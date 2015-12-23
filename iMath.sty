@@ -1,37 +1,139 @@
 %
 % iMath.sty --- macros for Mathematical computing and printing
 % (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
-\def\iMath@Date{Time-stamp: "2014/12/12"}
-\def\iMath@Revision{0.91}
-\def\@get@rev Time-stamp: "#1"\relax{\gdef\@time@{#1}}
-\expandafter\@get@rev \iMath@Date\relax
+\def\iMath@Date{Time-stamp: "2015/11/20"}%
+\def\iMath@Revision{0.91b}%
+% \def\@get@rev Time-stamp: "#1"\relax{\gdef\@time@{#1}}%
+% \expandafter\@get@rev \iMath@Date\relax%
 % \ProvidesPackage{iMath}[\@year@/@month@/\@day@ \iMath@Revision]
-\ProvidesPackage{iMath}[\@time@ \iMath@Revision]
+% \ProvidesPackage{iMath}[\@time@ \iMath@Revision]%
+%%
+%% LuaLaTeX does not use \fmtname (LaTeX2e case: 'LaTeX2e')
+% if \@ifundefined not defind ^^; uncomment the following block
+% \def\@ifundefined#1{%
+%   \expandafter\ifx\csname#1\endcsname\relax
+%     \expandafter\@firstoftwo
+%   \else
+%     \expandafter\@secondoftwo
+%   \fi}
+\@ifundefined{fmtname}{}{\ProvidesPackage{iMath}}
+%
 % MIT License applied.
 % not use perl, but can be used with emath, KETpic, PariGP, 
 % Mathematica, etc...(maybe)
 % \NeedsTeXFormat{LaTeX2e} ... usable under lualatex, latex3(?), latex2e 
 % \ProvidesPackage{iMath}[2014/04/22 v0.0]%%% 仕様変更注意
 \makeatletter
+%%% rnd@i, rnd@j, im@i, im@j should be 'local'
 \newcount\rnd@i
 \newcount\rnd@j
 \newcount\im@i
 \newcount\im@j
+%%% 
+%%% Basic Integer Arithmetic including Modulo and Power function
+%%%
+\def\im@inc#1{%%% ++
+  \@tempcnta=#1\advance\@tempcnta\@ne\xdef#1{\number\@tempcnta}}
+\def\im@dec#1{%%% -- 
+  \@tempcnta=#1\advance\@tempcnta\m@ne\xdef#1{\number\@tempcnta}}
+\def\im@add#1#2#3{%%%
+  \@tempcnta=#1\advance\@tempcnta #2\xdef#3{\number\@tempcnta}}
+\def\im@sub#1#2#3{%%%
+  \@tempcnta=#1\advance\@tempcnta -#2\xdef#3{\number\@tempcnta}}
+\def\im@mul#1#2#3{%%%
+  \@tempcnta=#1\multiply\@tempcnta by #2\xdef#3{\number\@tempcnta}}  
+\def\im@div#1#2#3{%%%
+  \@tempcnta=#1\divide\@tempcnta by #2\xdef#3{\number\@tempcnta}}  
+\def\im@mod#1#2#3{%%%
+  % \expandafter\@tmp@la@i #1\im@i=\number\@tmp@la@i\relax
+  % \expandafter\@tmp@la@j #1\im@j=\number\@tmp@la@j\relax
+  % \divide\im@i #2\multiply\im@i by -#2
+  % \advance\im@j\im@i\xdef#3{\number\im@j}%
+  \expandafter\im@i #1\relax
+  \expandafter\im@j #1\relax
+  \divide\im@i #2\multiply\im@i by -#2
+  \advance\im@j\im@i\xdef#3{\number\im@j}}  
+\def\im@pow{\@ifnextchar[%%%]
+  {\@im@pow}{\@im@pow[0]}}
+\def\@im@pow[#1]#2#3#4{% #4=#2^#3 mod #1, #1=0 default
+  \def\im@tmp@r{1}\xdef\im@tmp@a{#2}\xdef\im@tmp@b{#3}%
+  \xdef\im@tmp@m{#1}%
+  \@whilenum \im@tmp@b > 0 \do{%
+    \im@mod\im@tmp@b2\im@tmp@f%
+    \ifcase\im@tmp@f\or\im@mul\im@tmp@r\im@tmp@a\im@tmp@r\relax
+    \ifnum\im@tmp@m > 0\im@mod\im@tmp@r\im@tmp@m\im@tmp@r\fi\fi
+    \im@mul\im@tmp@a\im@tmp@a\im@tmp@a%
+    \ifnum\im@tmp@m > 0\im@mod\im@tmp@a\im@tmp@m\im@tmp@a\fi
+    \im@div\im@tmp@b2\im@tmp@b%
+  }%
+  \xdef#4{\im@tmp@r}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Original Counter Method
+%%% Ex. 
+%%% \imNewCount{ABC} -> internal new counter \@im:ABC genenerated
+%%% \imSetCount{ABC}{1} -> set the value 1 to the defined counter ABC 
+%%% \imGetCount{ABC} -> get the value of the counter ABC
+%%% \imAdvance{ABC}{3} -> ABC = ABC + 3
+%%% \imMultiply{ABC}{3} -> ABC = ABC * 3
+%%% \imDivide{ABC}{3} -> ABC = ABC / 3 (the remainder is ignored)
+%%% \imCount{ABC} -> imGetCount{ABC}, \imCount{ABC}=3 : forbidden.
+%%% (imCount{XXX}=.. supported).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\imNewCount#1{%
-  \expandafter\newcount\csname @im:#1\endcsname}
+  \expandafter\xdef\csname im@cnt:#1\endcsname{0}}
 \def\imSetCount#1#2{%
-  \expandafter\relax\csname @im:#1\endcsname=#2\relax}
-\def\imGetCount#1{%
-  \expandafter\number\csname @im:#1\endcsname}
+  \expandafter\xdef\csname im@cnt:#1\endcsname{#2}}
+\def\imGetCount#1{\csname im@cnt:#1\endcsname}
+\def\im@Count#1=#2{\imSetCount{#1}{#2}}
+\def\imCount#1{%
+  \@ifnextchar={\im@Count{#1}}{\imGetCount{#1}}}
 \def\imAdvance#1#2{%
-  \expandafter\advance\csname @im:#1\endcsname#2}
+  \expandafter\im@i\csname im@cnt:#1\endcsname\relax
+  \advance\im@i by #2\relax\imSetCount{#1}{\number\im@i}}
 \def\imMultiply#1#2{%
-  \expandafter\multiply\csname @im:#1\endcsname by #2}
+  \expandafter\im@i\csname im@cnt:#1\endcsname\relax
+  \multiply\im@i by #2\relax\imSetCount{#1}{\number\im@i}}
 \def\imDivide#1#2{%
-  \expandafter\divide\csname @im:#1\endcsname by #2}
+  \expandafter\im@i\csname im@cnt:#1\endcsname\relax
+  \divide\im@i by #2\relax\imSetCount{#1}{\number\im@i}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Original Stack Frame
+%%% \imPush / \imPop
+%%% \imPush[a]1\imPush[a]2
+%%% \imPop[a]\TMPa\imPop[a]\TMPb\TMPa\TMPb : 21
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newcount\im@stack@ct
+% \im@stack@ct\z@
+\def\imPush{%
+  \@ifnextchar[{\@imPush}{\@imPush[]}%]
+}
+\def\@imPush[#1]#2{%
+  \@ifundefined{im@stack@ct#1}{%
+    \expandafter\xdef\csname im@stack@ct#1\endcsname{0}}{}%
+  \expandafter\im@inc\csname im@stack@ct#1\endcsname\relax
+  \xdef\im@stk@num{\csname im@stack@ct#1\endcsname}%
+  \expandafter\xdef\csname im@stk#1:\im@stk@num\endcsname{#2}}%
+\def\imPop{%
+  \@ifnextchar[{\@imPop}{\@imPop[]}%]
+}
+\def\@imPop[#1]#2{%
+  \@ifundefined{im@stack@ct#1}{%
+    \message{Err:stack empty}%
+    \xdef#2{\@empty}%
+  }{%
+    \expandafter\ifnum\csname im@stack@ct#1\endcsname>0
+    \xdef\im@stk@num{\csname im@stack@ct#1\endcsname}%
+    \xdef#2{\csname im@stk#1:\im@stk@num\endcsname}%
+    \expandafter\im@dec\csname im@stack@ct#1\endcsname\relax
+    \else
+    \message{Err:stack empty}%
+    \xdef#2{\@empty}
+    \fi}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Array %%%
 %%% Declare Array #2 size of #1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\NewArray#1#2{%% 
   \expandafter\xdef\csname #2:@attr@\endcsname{NumericalArray,Starting1}%
   \expandafter\xdef\csname #2:0\endcsname{#1}%
@@ -47,7 +149,9 @@
     \expandafter\xdef\csname #2:##1\endcsname{##2}}%
   \expandafter\gdef\csname attr#2\endcsname{\csname #2:@attr@\endcscname}%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Declare Associative Array
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\NewAssocArray#1#2{%%
   \expandafter\xdef\csname #2:@attr@\endcsname{AssocArray,Keys:#1}%
   \expandafter\xdef\csname #2:@keys@\endcsname{#1}%
@@ -76,78 +180,43 @@
   \expandafter\gdef\csname attr#2\endcsname{\csname #2:@attr@\endcscname}%
   \expandafter\gdef\csname key#2\endcsname{\csname #2:@keys@\endcsname}%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Reverse CSV and string
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcount\im@rev@ct%
 \def\ReverseCSV#1#2{
-  \@tempcnta\z@\relax
-  \@for\@x:=#1\do{\advance\@tempcnta\@ne\imPushStack\@x}%
-  \xdef\im@ret{}\edef\im@m{\number\@tempcnta}\@tempcnta\z@\relax
-  \@whilenum \@tempcnta < \im@m \do{%
-    \imPopStack\im@i%
-    \ifnum\@tempcnta=0\xdef\im@ret{\im@i}%
-    \else\xdef\im@ret{\im@ret,\im@i}\fi
-    \advance\@tempcnta\@ne\relax
-  }%
+  \im@rev@ct\z@\relax
+  \@for\@x:=#1\do{%
+    \advance\im@rev@ct\@ne%
+    \imPush[r@csv]\@x}%
+  \xdef\im@ret{}\edef\im@rcsv@n{\number\im@rev@ct}%
+  \loop
+  \imPop[r@csv]\im@rcsv
+  \ifx\im@rcsv\@empty \repeat
+  % \im@rev@ct\z@\relax
+  % \@whilenum \im@rev@ct < \im@rcsv@n \do{%
+  %   \imPop[r@csv]\im@rcsv@a%
+  %   \ifnum\im@rev@ct=0\xdef\im@ret{\im@rcsv@a}%
+  %   \else\xdef\im@ret{\im@ret,\im@rcsv@a}\fi
+  %   \advance\im@rev@ct\@ne\relax
+  % }%
   \xdef#2{\im@ret}%
 }
 \def\ReverseSTR#1#2{
-  \@tempcnta\z@\relax
-  \@tfor\@x:=#1\do{\advance\@tempcnta\@ne\imPushStack\@x}%
-  \xdef\im@ret{}\edef\im@m{\number\@tempcnta}\@tempcnta\z@\relax
-  \@whilenum \@tempcnta < \im@m \do{%
-    \imPopStack\im@i%
-    \ifnum\@tempcnta=0\xdef\im@ret{\im@i}%
-    \else\xdef\im@ret{\im@ret\im@i}\fi
-    \advance\@tempcnta\@ne\relax
+  \im@rev@ct\z@\relax
+  \expandafter\@tfor\expandafter\@x\expandafter:\expandafter=#1\do{%
+    \advance\im@rev@ct\@ne%
+    \imPush[r@csv]\@x}%
+  \xdef\im@ret{}\edef\im@rcsv@n{\number\im@rev@ct}%
+  \im@rev@ct\z@\relax
+  \@whilenum \im@rev@ct < \im@rcsv@n \do{%
+    \imPop[r@csv]\im@rcsv@a%
+    \ifnum\im@rev@ct=0\xdef\im@ret{\im@rcsv@a}%
+    \else\xdef\im@ret{\im@ret\im@rcsv@a}\fi
+    \advance\im@rev@ct\@ne\relax
   }%
   \xdef#2{\im@ret}%
 }
-%%% Original Stack Frame
-\newcount\im@stack@ct
-\im@stack@ct\z@
-\def\imPushStack#1{%
-  \advance\im@stack@ct\@ne\relax
-  \def\im@stack@ct@num{\number\im@stack@ct}%
-  \expandafter\xdef\csname im@\im@stack@ct@num\endcsname{#1}}%
-\def\imPopStack#1{%
-  \ifnum\im@stack@ct>0
-  \def\im@stack@ct@num{\number\im@stack@ct}%
-  \xdef#1{\csname im@\im@stack@ct@num\endcsname}%
-  \advance\im@stack@ct\m@ne\relax
-  \else
-  \message{Err:stack empty}%
-  \fi}%
-%%% Basic Integer Arithmetic including Modulo and Power function
-\def\im@add#1#2#3{%%%
-  \@tempcnta=#1\advance\@tempcnta #2\xdef#3{\number\@tempcnta}}
-\def\im@sub#1#2#3{%%%
-  \@tempcnta=#1\advance\@tempcnta -#2\xdef#3{\number\@tempcnta}}
-\def\im@mul#1#2#3{%%%
-  \@tempcnta=#1\multiply\@tempcnta by #2\xdef#3{\number\@tempcnta}}  
-\def\im@div#1#2#3{%%%
-  \@tempcnta=#1\divide\@tempcnta by #2\xdef#3{\number\@tempcnta}}  
-\def\im@mod#1#2#3{%%%
-  % \expandafter\@tmp@la@i #1\im@i=\number\@tmp@la@i\relax
-  % \expandafter\@tmp@la@j #1\im@j=\number\@tmp@la@j\relax
-  % \divide\im@i #2\multiply\im@i by -#2
-  % \advance\im@j\im@i\xdef#3{\number\im@j}%
-  \expandafter\im@i #1\relax
-  \expandafter\im@j #1\relax
-  \divide\im@i #2\multiply\im@i by -#2
-  \advance\im@j\im@i\xdef#3{\number\im@j}}  
-\def\im@pow{\@ifnextchar[%%%]
-  {\@im@pow}{\@im@pow[0]}}
-\def\@im@pow[#1]#2#3#4{% #3=#1^#2
-  \def\im@tmp@r{1}\xdef\im@tmp@a{#2}\xdef\im@tmp@b{#3}%
-  \xdef\im@tmp@m{#1}%
-  \@whilenum \im@tmp@b > 0 \do{%
-    \im@mod\im@tmp@b2\im@tmp@f%
-    \ifcase\im@tmp@f\or\im@mul\im@tmp@r\im@tmp@a\im@tmp@r\relax
-    \ifnum\im@tmp@m > 0\im@mod\im@tmp@r\im@tmp@m\im@tmp@r\fi\fi
-    \im@mul\im@tmp@a\im@tmp@a\im@tmp@a%
-    \ifnum\im@tmp@m > 0\im@mod\im@tmp@a\im@tmp@m\im@tmp@a\fi
-    \im@div\im@tmp@b2\im@tmp@b%
-  }%
-  \xdef#4{\im@tmp@r}}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Alias \ZAdd 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -158,9 +227,14 @@
 %%%%% CallPariGP : use CAS (e.g. Pari/GP) with \@@input cmd(tex:\input)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\CallPariGP#1#2{% #1 = random seed
-  \begingroup\makeatletter\endlinechar=\m@ne\everyeof{\noexpand}
-  \edef\@@x{\endgroup\def\noexpand#2{\@@input|"echo '#1'|gp -q" }
-  }\@@x
+  \begingroup\makeatletter\endlinechar=\m@ne\everyeof{\noexpand}%
+  \edef\@@x{\endgroup\def\noexpand#2{\@@input|"echo '#1'|gp -q" }%
+  }\@@x%
+}
+\def\CallMaxima#1#2{% #1 = random seed
+  \begingroup\makeatletter\endlinechar=\m@ne\everyeof{\noexpand}%%
+  \edef\@@x{\endgroup\def\noexpand#2{\@@input|"echo '#1'|maxima --very-quiet" }%
+  }\@@x%
 }
 %%%%%% GetGCD #3 = GCD(#1,#2) %%%%%
 \def\GetGCD#1#2#3{%%%
@@ -319,19 +393,22 @@
   \tmp@sig\tmp@Anum%%%
   \fi
 }
-\def\QFracP#1{%%% QFrac with ( ) if negative
+\def\QFracParen#1{%%% QFrac with ( ) if negative
   \def\tmp@A{#1}\relax\RatNumDen{tmp@A}%%%
   \ifnum\tmp@Anum<0\left(\QFrac#1\right)\else
   \QFrac#1\fi
 }
+\let\QFracP\QFracParen% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% random number related (experimental) 
 %%%%% Use '.lmr' for file name exttention to save the ramdom seed
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \gdef\@use@pari{0}
 \def\UsePari{\gdef\@use@pari{1}}
+\let\UsePariGP\UsePari
 \def\NotUsePari{\gdef\@use@pari{0}}
-\def\iM@RP{301003151}% prime(10)^2*prime(20)^3
+\let\NotUsePariGP\NotUsePari
+\def\im@RP{301003151}% prime(10)^2*prime(20)^3
 \def\im@RA{2060}% prime(10)*prime(20)+1
 \def\im@RB{20677}% 10000000-th prime, the b of recursion formula 'ax+b'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -435,7 +512,7 @@
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% ZRand : #3 = random integer from #1 to #2
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \def\ZRand#1#2#3{%%%
   \edef\@st{#1}\edef\@ed{#2}%%%
   \im@sub\@ed\@st\@range\im@add\@range1\@range
@@ -477,6 +554,10 @@
   \ZRand1{\number\rnd@i}\rnd@tmp%
   \edef#2{\csname rsel@tmp:\rnd@tmp\endcsname}%
 }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% SelItem : Item with labels
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \makeatother
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%% EOF of iMath.sty %%%%%%%%%%
