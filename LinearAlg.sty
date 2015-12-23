@@ -352,12 +352,15 @@
   \def\tmp@comma{,}\def\tmp@semicolon{;}\relax
   \def\tmp@arg{}\relax
   \@tfor \tmp@val:=#1\do{%
-    \ifx\tmp@val\tmp@csv\advance\la@i\@ne\else
-    \ifx\tmp@val\tmp@semicolon\advance\la@i\@ne\def\la@row{\the\la@i}\else
-    \edef\tmp@arg{\tmp@arg{\tmp@val}}\fi\fi
-  }\def\la@col{\the\la@j}\relax
-  \NewMatrix{\la@row}{\la@col}{tmp@Mat}
-  \SetMatrix{tmp@Mat}{\tmp@arg}
+    \ifx\tmp@val\tmp@comma\advance\la@j\@ne\relax DEBUG:comma
+    \else
+    \ifx\tmp@val\tmp@semicolon\advance\la@i\@ne\relax DEBUG:semicolon
+    \def\la@col{\the\la@j}\else
+    \edef\tmp@arg{\tmp@arg{\tmp@val}} DEBUG: \tmp@val
+    \fi\fi
+  }\def\la@row{\the\la@i}\relax
+  \NewMatrix{\la@row}{\la@col}{#2}
+  \SetMatrix{\tmp@arg}{#2}
 }
 %%% Substitute Matrix \SubstMatrix{OLD}{NEW} \NEWaa=\OLaa,...,\NEWcd=\OLDcd
 %%% #1 is always the targe object. #1 = #2
