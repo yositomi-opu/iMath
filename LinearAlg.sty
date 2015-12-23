@@ -346,6 +346,13 @@
     \ifnum\la@j=\la@col\la@j=1\advance\la@i\@ne\fi
   }
 }
+%%% CSSVtoMatrix: Comma/Semicolon Separated format (pgyouretu/pari) to Matrix
+\def\CSSVtoMatrix#1#2{% #1={1,2,3;4,5,6}, #2=Matrix node
+  \la@i=1\la@j=1\relax
+  \@tfor \tmp@val:=#1\do{%
+    
+  }
+}
 %%% Substitute Matrix \SubstMatrix{OLD}{NEW} \NEWaa=\OLaa,...,\NEWcd=\OLDcd
 %%% #1 is always the targe object. #1 = #2
 %%% NewMatrix not needed!
@@ -399,9 +406,6 @@
     \ialign{\hfil$##$\hfil&&\quad\hfil$##$\hfil\crcr
       \mathstrut\crcr\noalign{\kern-\baselineskip}
       #1\crcr\mathstrut\crcr\noalign{\kern-\baselineskip}}}\,}
-\def\CSVpmatrix{%%%
-  \ensuremath{\org@matrix{\mathstrut#1}}
-}
 \def\DspMatrix#1{%%% Only components arrayed
   \ensuremath{\org@matrix{\mathstrut\RepMatrix{#1}}}
 }
