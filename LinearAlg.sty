@@ -1,0 +1,1086 @@
+%
+% LinearAlg.sty --- macros for Linear Algebra computing and printing
+% (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
+% (注) 本ファイルで定義されたマクロの仕様は予告なく変更されることがあります.
+\makeatletter
+\def\LinearAlg@Revision{Time-stamp: "2015/11/17"}
+% \ProvidesPackage{LinearAlg}\expandafter[\LinearAlg@Revision]%%% 仕様変更注意
+\ProvidesPackage{LinearAlg}[2015/11/17]%%% 仕様変更注意
+%
+% \NeedsTeXFormat{LaTeX2e} ... もはや LaTeX2e でもない. lualatex OK を目指す
+% emath は lualatex で動かない ... emath からの脱却が必要
+% \ProvidesPackage{LinearAlg}[2014/04/21 v0.4]%%% 仕様変更注意
+\RequirePackage{amsmath}
+%%% This package basically does not depend any package.
+\RequirePackage{ifthen}
+% \RequirePackage{emath}
+% \RequirePackage{emathQf}
+% \RequirePackage{emathW}
+% \RequirePackage{emathPp}
+% \RequirePackage[perl]{emathRn}
+% \RequirePackage{emathAe}
+\RequirePackage{iMath}
+
+%%% Internal Counter
+\@ifundefined{c@la@i}{}
+       {\PackageWarning{LinearAlg}{Counter `la@i' already defined}}
+\@ifundefined{c@la@j}{}
+       {\PackageWarning{LinearAlg}{Counter `la@j' already defined}}
+\@ifundefined{c@la@k}{}
+       {\PackageWarning{LinearAlg}{Counter `la@k' already defined}}
+\@ifundefined{c@la@l}{}
+       {\PackageWarning{LinearAlg}{Counter `la@l' already defined}}
+\@ifundefined{c@la@va}{}
+       {\PackageWarning{LinearAlg}{Counter `la@va' already defined}}
+\@ifundefined{c@la@vb}{}
+       {\PackageWarning{LinearAlg}{Counter `la@vb' already defined}}
+\@ifundefined{c@la@vc}{}
+       {\PackageWarning{LinearAlg}{Counter `la@vc' already defined}}
+\@ifundefined{c@la@p}{}
+       {\PackageWarning{LinearAlg}{Counter `la@p' already defined}}
+\@ifundefined{c@la@q}{}
+       {\PackageWarning{LinearAlg}{Counter `la@q' already defined}}
+\@ifundefined{c@la@r}{}
+       {\PackageWarning{LinearAlg}{Counter `la@r' already defined}}
+\@ifundefined{c@la@cf}{}
+       {\PackageWarning{LinearAlg}{Counter `la@cf' already defined}}
+\@ifundefined{c@la@row}{}
+       {\PackageWarning{LinearAlg}{Counter `la@row' already defined}}
+\@ifundefined{c@la@col}{}
+       {\PackageWarning{LinearAlg}{Counter `la@col' already defined}}
+\@ifundefined{c@la@max}{}
+       {\PackageWarning{LinearAlg}{Counter `la@max' already defined}}
+\@ifundefined{c@la@deg}{}
+       {\PackageWarning{LinearAlg}{Counter `la@deg' already defined}}
+% \@ifundefined{c@save@a}{}
+%        {\PackageWarning{LinearAlg}{Counter `save@a' already defined}}
+% \@ifundefined{c@save@b}{}
+%        {\PackageWarning{LinearAlg}{Counter `save@b' already defined}}
+% \@ifundefined{c@save@c}{}
+%        {\PackageWarning{LinearAlg}{Counter `save@c' already defined}}
+% \@ifundefined{c@save@d}{}
+%        {\PackageWarning{LinearAlg}{Counter `save@d' already defined}}
+\@ifundefined{la@str}{}
+       {\PackageWarning{LinearAlg}{Macro `la@str' already defined}}
+\newcount\la@i
+\newcount\la@j
+\newcount\la@k
+\newcount\la@l
+\newcount\la@va
+\newcount\la@vb
+\newcount\la@vc
+\newcount\la@p
+\newcount\la@q
+\newcount\la@r
+\newcount\la@cf
+\newcount\la@row
+\newcount\la@col
+\newcount\la@max
+\newcount\la@deg
+%%%%%%% basic macros %%%%%%%
+%%
+%% error
+%%
+\def\la@error#1#2{%
+  \begingroup
+  \errhelp{[Usage: #2]}%
+  \errmessage{[Error! #1]}
+  \endgroup
+}
+%%
+%% arithmetic
+%%
+\def\la@add#1#2#3{% same as im@add
+  \@tempcnta=#1\advance\@tempcnta #2\xdef#3{\number\@tempcnta}
+}
+\def\la@sub#1#2#3{% same as im@sub
+  \@tempcnta=#1\advance\@tempcnta -#2\xdef#3{\number\@tempcnta}
+}
+\def\la@mul#1#2#3{% same as im@mul
+  \@tempcnta=#1\multiply\@tempcnta by #2\xdef#3{\number\@tempcnta}
+}  
+\def\la@div#1#2#3{% same as im@div
+  \@tempcnta=#1\divide\@tempcnta by #2\xdef#3{\number\@tempcnta}
+}  
+\def\la@mod#1#2#3{%
+  \expandafter\la@i #1\relax
+  \expandafter\la@j #1\relax
+  \divide\la@i #2\multiply\la@i by -#2
+  \advance\la@j\la@i\xdef#3{\number\la@j}%
+}  
+\def\la@pow#1#2#3{% #3=#1^#2
+  %% not implemented
+}
+%%%% below are defined in iMath
+% \let\ZAdd\la@add
+% \let\ZSub\la@sub
+% \let\ZMul\la@mul
+% \let\ZDiv\la@div
+% \let\ZMod\la@mod
+% \let\ZPow\la@pow
+\def\la@rand#1#2#3{% set random integer between #1-#2  to #3
+  \xdef\tmp@start{#1}\xdef\tmp@end{#2}
+  \la@sub\tmp@end\tmp@start\tmp@range\la@add\tmp@range1\tmp@range
+  %% more than two arguments ... fail!!
+  % \def\tmp@ret{\input"|./getrand.sh \tmp@start \tmp@end"}
+  \IfFileExists{./getrand.sh}{%
+    \def\@@rand{\@@input|"./getrand.sh \tmp@range"}
+    \la@add\tmp@start\@@rand\LArand@@ret
+    % \def\LArand@@ret{\@@input|"./getrand.sh \tmp@start{} \tmp@end"}
+    % \message{\@@ret}
+    \xdef#3{\LArand@@ret}
+  }{%
+    \message{Warning!: getrand.sh not found.}
+    \IfFileExists{./genseed.sh}%
+    {\def\@@seed{\@@input|"./genseed.sh"}}{\edef\@@seed{\time}}
+    \multiply\la@p\m@ne\advance\la@q\la@p\advance\la@q\@ne
+    \la@p\tmp@start
+    \@tempcnta\@@seed
+    \@tempcntb\@tempcnta
+    \divide\@tempcnta by\la@q\relax
+    \multiply\@tempcnta by\la@q\relax
+    \advance\@tempcntb-\@tempcnta
+    \advance\@tempcntb\la@p
+    \xdef#3{\number\@tempcntb}
+  }
+}
+%%
+%% display ax+by+cz, a_1x_1+a_2x_2+\cdots+a_nx_n
+%%
+%% 変数の前に\!,\, を入れればよいので本当はいらない:
+\def\la@term@sep{\,}% a_1 \la@term@sep x_1 +...
+\def\SetDspTermSep#1{\def\la@term@sep{#1}}
+\def\dsp@head@flag{1}% 1: true, 0: false \newif did not work with array
+\def\DspHeadFlag#1{\gdef\dsp@head@flag{#1}}
+%% 自分で項を表示したい人向けマクロ
+%% head term only
+\def\DspMonoidH#1#2{%
+  \ifnum#1=0 \else\DspHeadFlag{0}\fi
+  \def\tmp@flag{#2}%
+  \def\tmp@empty{}%
+  \ifnum#1>1 #1 \la@term@sep #2\else
+  \ifnum#1=1 \ifx\tmp@flag\tmp@empty 1\else #2\fi \else
+  \ifnum#1=-1 \ifx\tmp@flag\tmp@empty -\la@term@sep1%
+               \else -\la@term@sep#2\fi \else
+  \ifnum#1<-1 #1\la@term@sep#2
+  \fi\fi\fi\fi
+}
+\def\DspMonoidNH#1#2{%Not Head term
+  \gdef\tmp@empty{}%
+  \ifnum#1>1 + #1 \la@term@sep #2 \else
+  \ifnum#1=1 + #2 \else
+  \ifnum#1=0 \relax   \else
+  % #1 < 0 case
+  \ifnum#1=-1 - \la@term@sep #2 \else
+  \ifnum#1<-1 - \la@term@sep
+  \la@cf #1\multiply\la@cf -1 \number\la@cf \la@term@sep #2
+  \fi\fi\fi\fi\fi
+}
+\def\DspMonoid#1#2{\ifcase\dsp@head@flag\dsp@monoid@nh{#1}{#2}%
+  \else\dsp@monoid@h{#1}{#2}\fi}
+%%
+%% for align/array environment
+%%
+%% variables are indexed automartically, e.g. x_1,x_2,...
+%%
+\def\be@sig{&}% before sign
+\def\af@sig{&}% after sign
+\def\SetTabBeforeSign#1{\def\be@sig{#1}}
+\def\SetTabAfterSign#1{\def\af@sig{#1}}
+\def\DspLinearEqAlign#1#2{%
+  \la@i=1\relax\def\h@flag{1}
+  \def\tmp@str{}
+  \@for\coeff:=#1\do{%
+    \def\tmp@sig{\ifnum\coeff>0 +\else\ifnum\coeff=0\relax \else -\fi\fi}
+    \def\tmp@@sig{\ifnum\coeff<0 -\else \relax\fi}
+    \def\tmp@var{\ifnum\coeff=0\relax\else #2_{\number\la@i}\fi}
+    \la@cf \coeff\multiply\la@cf\m@ne
+    \def\tmp@@cf{\ifnum\coeff<0 \number\la@cf\else\coeff\fi}
+    \edef\tmp@cf{\ifnum\tmp@@cf=1\relax\else\tmp@@cf\fi}
+    \edef\tmp@str{\tmp@str
+      \ifnum\h@flag=1
+      \expandafter\@firstoftwo
+      \else
+      \expandafter\@secondoftwo
+      \fi
+      {\be@sig\tmp@@sig\af@sig}{\be@sig\tmp@sig\af@sig}
+    }
+    \ifnum\coeff=0\relax\else\def\h@flag{0}\fi
+    \edef\tmp@str{\tmp@str
+      \ifnum\coeff=0\relax\else\tmp@cf\la@term@sep\tmp@var\fi}
+    \advance\la@i\@ne
+  }
+  \tmp@str
+}
+\def\DspLinearEq#1#2{%
+  \edef\tmp@be@sig{\be@sig}\edef\tmp@af@sig{\af@sig}
+  \def\be@sig{}\def\af@sig{}
+  \DspLinearEqAlign#1#2
+  \edef\be@sig{\tmp@be@sig}\edef\af@sig{\tmp@af@sig}
+}
+%%%
+%%% case that all variables are given
+%%%
+\def\DspLinearEqAlignVar#1#2{% {a1,a2,...,aN}{x,y,....z}
+  \la@i=1\la@j=1\relax\def\h@flag{1}
+  \def\la@var@max{}\def\la@cf@max{}
+  \@for\vari:=#2\do{%
+    \def\@@j{\number\la@j}
+    \expandafter\edef\csname @var\@@j\endcsname{\vari}
+    \edef\la@var@max{\@@j}
+    \advance\la@j\@ne
+  }
+  \def\tmp@str{}
+  \@for\coeff:=#1\do{%
+    \def\tmp@sig{\ifnum\coeff>0 +\else\ifnum\coeff=0\relax \else -\fi\fi}
+    \def\tmp@@sig{\ifnum\coeff<0 -\else \relax\fi}
+    \def\@@i{\number\la@i}
+    \def\tmp@var{%
+      \ifnum\coeff=0\relax\else \expandafter\csname @var\@@i\endcsname\fi}
+    \la@cf \coeff\multiply\la@cf\m@ne
+    \def\tmp@@cf{\ifnum\coeff<0 \number\la@cf\else\coeff\fi}
+    \edef\tmp@cf{\ifnum\tmp@@cf=1\relax\else\tmp@@cf\fi}
+    \edef\tmp@str{\tmp@str
+      \ifnum\h@flag=1
+      \expandafter\@firstoftwo
+      \else
+      \expandafter\@secondoftwo
+      \fi
+      {\be@sig\tmp@@sig\af@sig}{\be@sig\tmp@sig\af@sig}
+    }
+    \ifnum\coeff=0\relax\else\def\h@flag{0}\fi
+    \edef\tmp@str{\tmp@str
+      \ifnum\coeff=0\relax\else\tmp@cf\la@term@sep\tmp@var\fi}
+    \edef\la@cf@max{\@@i}
+    \advance\la@i\@ne
+  }
+  \ifnum\la@cf@max>\la@var@max\la@error{Insufficient var's}{}\fi
+  \tmp@str
+}
+\def\DspLinearEqVar#1#2{%
+  \edef\tmp@be@sig{\be@sig}\edef\tmp@af@sig{\af@sig}
+  \def\be@sig{}\def\af@sig{}
+  \DspLinearEqAlignVar{#1}{#2}
+  \edef\be@sig{\tmp@be@sig}\edef\af@sig{\tmp@af@sig}
+}
+%%%%%%%%%%%%%%% ver1 compatibility %%%%%%%%%%%%%%%%%
+\def\numTOabc#1#2{%
+  \newcount\ch@code\ch@code=96
+  \advance\ch@code #1
+  \expandafter\def\csname #2\endcsname{\char \ch@code}
+}
+%% 0->'a',1->'b' for matrix suffix
+\def\num@to@abc#1#2{%
+  \newcount\ch@code\ch@code=96
+  \advance\ch@code #1
+  \expandafter\def\csname #2\endcsname{\char \ch@code}
+}
+%%%
+%%% Matrix Define, Operation, ...
+%%%
+% NewMatrix: all zero entry
+\def\NewMatrix#1#2#3{% Declare #1x#2 matrix #3
+  \la@i=0\la@j=0\edef\@@i{\number\la@i}\edef\@@j{\number\la@j}
+  \la@k=1\la@l=1\edef\@@k{\number\la@k}\edef\@@l{\number\la@l}
+  \expandafter\xdef\csname #3:type\endcsname{IntegerMatrix}% 0,0=row,col
+  \expandafter\xdef\csname #3:typeid\endcsname{11}% 0,0=row,col
+  \expandafter\xdef\csname #3:\@@i,\@@j\endcsname{#1,#2}% 0,0=row,col
+  \expandafter\xdef\csname #3:\@@i,\@@l\endcsname{#2}% 0,1 = col
+  \expandafter\xdef\csname #3:\@@k,\@@j\endcsname{#1}% 1,0 = row
+  \la@row=#1\advance\la@row\@ne\advance\la@i\@ne
+  \la@col=#2\advance\la@col\@ne\advance\la@j\@ne
+  \@whilenum \la@i<\la@row \do{%
+    \la@j=1
+    \@whilenum \la@j<\la@col \do{%
+      \edef\@@i{\number\la@i}\edef\@@j{\number\la@j}
+      \expandafter\xdef\csname #3:\@@i,\@@j\endcsname{0}
+      \advance\la@j\@ne
+    }
+    \par
+    \advance\la@i\@ne
+  }
+  \expandafter\gdef\csname #3\endcsname##1##2{%
+    \csname #3:##1,##2\endcsname
+  }
+  \expandafter\gdef\csname get#3\endcsname##1##2{%
+    \csname #3:##1,##2\endcsname
+  }
+  \expandafter\gdef\csname set#3\endcsname##1##2##3{
+    \expandafter\xdef\csname #3:##1,##2\endcsname{##3}
+  }
+}
+%%%
+%%% Identity Matrix 
+%%%
+\def\IdentityMatrix#1#2{% Defind #1x#1 identity matrix #2
+  \DeclareMatrix{#1}{#1}{#2}% zero matrix 
+  \la@i=1\la@k=#1\relax\advance\la@k\@ne
+  \@whilenum \la@i<\la@k \do{%
+    \edef\@@i{\number\la@i}
+    \expandafter\xdef\csname #1:\@@i,\@@i\endcsname{1}
+    \advance\la@i\@ne
+  }
+}
+%%% Chk #1 is already defined?
+\def\la@chkdefined#1#2{
+  \def\@result{0}
+  \ifcsname #1:0,0\endcsname\relax\else\def\@result{1}\fi
+  \ifcsname #1:0,1\endcsname\relax\else\def\@result{1}\fi
+  \ifcsname #1:1,0\endcsname\relax\else\def\@result{1}\fi
+  \ifcase\@result\relax\else
+  \la@error{Before using \\#2, first define it via \\NewMatrix}%
+  {\\NewMatrix{row}{col}{#2}}\fi
+}
+%%% Set Matrix : before use , define matrix by NewMatrix.
+\def\SetMatrix#1#2{% Set elements of #2 by #1 parameter 1000100 etc.
+  \la@chkdefined{#2}{SetMatrix}
+  \la@row \csname #2:1,0\endcsname%
+  \la@col \csname #2:0,1\endcsname\advance\la@col\@ne
+  \la@i=1\la@j=1\relax%
+  \@tfor \tmp@val:=#1\do{%
+    % \la@k \la@i\advance\la@k\@ne
+    % \la@l \la@j\advance\la@l\@ne
+    \def\@@i{\number\la@i}\def\@@j{\number\la@j}
+    \expandafter\xdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}%
+    \advance\la@j\@ne
+    \ifnum\la@j=\la@col\la@j=1\advance\la@i\@ne\fi
+  }
+}
+%%% Substitute Matrix \SubstMatrix{OLD}{NEW} \NEWaa=\OLaa,...,\NEWcd=\OLDcd
+%%% #1 is always the targe object. #1 = #2
+%%% NewMatrix not needed!
+\def\SubstMatrix#1#2{%#1,#2: csname, substitute #1 -> #2 
+  \edef\LA@row{\csname #1:1,0\endcsname}
+  \edef\LA@col{\csname #1:0,1\endcsname}
+  \NewMatrix{\LA@row}{\LA@col}{#2}
+  \advance\la@row\@ne\advance\la@col\@ne
+  \la@i=1\relax \@whilenum \la@i<\la@row \do{%
+    \la@j=1
+    \@whilenum \la@j<\la@col \do{%
+      \edef\@@i{\number\la@i}\edef\@@j{\number\la@j}
+      \edef\tmp@val{\csname #1\endcsname\@@i\@@j}
+      \expandafter\xdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}
+      \advance\la@j\@ne
+    }
+    \advance\la@i\@ne
+  }
+}
+\let\CopyMatrix\SubstMatrix
+%%% DspMatrix
+%%% DspMatrix{A} --- matrix,pmatrix,
+%%%
+\def\RepMatrix#1{% Matrix を &...&\crcr&...& の形式で出力する.
+  \la@chkdefined{#1}{RepMatrix}
+  \la@k \csname #1\endcsname10\la@row\la@k\advance\la@row\@ne%
+  \la@l \csname #1\endcsname01\la@col\la@l\advance\la@col\@ne%
+  \def\la@str{}\la@i=1\relax 
+  \@whilenum \la@i < \la@row \do{%
+    \def\@@i{\number\la@i}%
+    \la@j=1
+    \@whilenum \la@j < \la@col \do{%
+      \def\@@j{\number\la@j}%
+      \edef\@@val{\csname #1\endcsname\@@i\@@j}%
+      \edef\la@str{\la@str%
+        \ifnum\la@j=1 \expandafter\@firstoftwo
+        \else\expandafter\@secondoftwo\fi
+        {\@@val}{&\@@val}}
+        % {\noexpand\QFrac{\@@val}}{&\noexpand\QFrac{\@@val}}}
+      \advance\la@j\@ne%
+    }%
+    \edef\la@str{\la@str%
+      \ifnum\la@i<\la@k \expandafter\@firstoftwo
+      \else\expandafter\@secondoftwo\fi
+      {\crcr}{}}
+    \advance\la@i\@ne%
+  }
+  \la@str
+}
+\def\org@matrix#1{\null\,\vcenter{\normalbaselines\m@th
+    \ialign{\hfil$##$\hfil&&\quad\hfil$##$\hfil\crcr
+      \mathstrut\crcr\noalign{\kern-\baselineskip}
+      #1\crcr\mathstrut\crcr\noalign{\kern-\baselineskip}}}\,}
+\def\DspMatrix#1{%%% Only components arrayed
+  \ensuremath{\org@matrix{\mathstrut\RepMatrix{#1}}}
+}
+\def\DspPMatrix#1{%%% Normal Paren'd matrix
+  \ensuremath{\left(\org@matrix{\mathstrut\RepMatrix{#1}}\right)}
+}
+\def\DspDMatrix#1{%%% Determinant format
+  \ensuremath{\left|\org@matrix{\mathstrut\RepMatrix{#1}}\right|}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PariMatrix
+%%% Ouput matrix in the Pari-GP / emath pgyouretu compatible format.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\PariMatrix#1#2{% \#2 = 1,2,3;3,4,5;2,2,4 etc..
+  \la@chkdefined{#1}{RepMatrix}%%%
+  \la@k \csname #1\endcsname10\la@row\la@k\advance\la@row\@ne%%%
+  \la@l \csname #1\endcsname01\la@col\la@l\advance\la@col\@ne%%%
+  \def\la@str{}\la@i=1\relax \@whilenum \la@i < \la@row \do{%%%
+    \def\@@i{\number\la@i}%%%
+    \la@j=1\relax \@whilenum \la@j < \la@col \do{%
+      \def\@@j{\number\la@j}%%%
+      \edef\@@val{\csname #1\endcsname\@@i\@@j}%
+      \edef\la@str{\la@str%%%
+        \ifnum\la@j=1 \expandafter\@firstoftwo
+        \else\expandafter\@secondoftwo\fi
+        {\@@val}{,\@@val}}
+      \advance\la@j\@ne%%%
+    }%%%
+    \edef\la@str{\la@str%%%
+      \ifnum\la@i<\la@k \expandafter\@firstoftwo
+      \else\expandafter\@secondoftwo\fi
+      {;}{}}
+    \advance\la@i\@ne%%%
+  }%%%
+  \expandafter\xdef\csname #2\endcsname{\la@str}%%%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% ColVector#1
+%%% ColVector{1{-1}3{-2}05}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\ColVector#1{%%%
+  \def\la@str{}\la@i=1%%%
+  \@tfor\la@cf:=#1\do{%
+    \advance\la@i\@ne
+  }\la@j=1
+  \@tfor\la@cf:=#1\do{%
+    \advance\la@j\@ne
+    \edef\la@str{\la@str \la@cf}%%%
+    \edef\la@str{\la@str%%%
+      \ifnum\la@j<\la@i\expandafter\@firstoftwo
+      \else\expandafter\@secondoftwo
+      \fi
+      {\crcr{}}{}%%%
+    }%%%
+  }%%%
+  \ensuremath{\left(\org@matrix{\la@str}\right)}%%%
+}
+\let\ColVec\ColVector
+%%% RowVector#1
+%%% RowVector{1{-1}3{-2}05}
+%%%
+\def\RowVector#1{%%%
+  \def\la@str{}\def\la@flag{1}%%%
+  \@tfor\la@cf:=#1 \do{%
+    \def\tmp@str{%%%
+      \ifnum\la@flag=1
+      \expandafter\@firstoftwo
+      \else
+      \expandafter\@secondoftwo
+      \fi
+      {\number\la@cf}{\,\kern\arraycolsep\, \number\la@cf}}
+    \edef\la@str{\la@str\tmp@str}%%%
+    \def\la@flag{0}%%%
+  }%%%
+  \ensuremath{\left(\mathstrut\la@str\right)}%%%
+}
+\let\RowVec\RowVector
+%
+%%% AppendRowMatrix
+%%% AppendRowMatrix{A}{B}{C} -> C=(A\\B)
+%%%
+\def\AppendRowMatrix#1#2#3{%%%
+  \edef\LA@rowA{\csname #1\endcsname10}%%%
+  \edef\LA@rowB{\csname #2\endcsname10}%%%
+  \la@add\LA@rowA\LA@rowB\LA@rowC
+  \def\LA@colA{\csname #1\endcsname01}
+  \def\LA@colB{\csname #2\endcsname01}
+  \ifnum\LA@colA=\LA@colB\relax\else\la@error{Number of columns mismatch!}{}\fi
+  \NewMatrix{\LA@rowC}{\LA@colA}{#3}%%%
+  \la@i=0
+  \@whilenum\la@i<\LA@rowA \do{%%%
+    \la@k\la@i\advance\la@k\@ne\def\@@i{\number\la@k}
+    \la@j=0
+    \@whilenum\la@j<\LA@colA \do{%%%
+      \la@l\la@j\advance\la@l\@ne\def\@@j{\number\la@l}
+      \expandafter\xdef\csname#3:\@@i,\@@j\endcsname{%
+        \csname#1\endcsname\@@i\@@j}
+      \advance\la@j\@ne
+    }
+    \advance\la@i\@ne
+  }
+  \la@i=0
+  \@whilenum\la@i<\LA@rowB \do{%
+    \la@k\la@i\advance\la@k\@ne\def\@@i{\number\la@k}
+    \la@row\LA@rowA\advance\la@row\la@k\def\@@r{\number\la@row}
+    \la@j=0
+    \@whilenum\la@j<\LA@colA \do{%
+      \la@l\la@j\advance\la@l\@ne\def\@@j{\number\la@l}
+      \expandafter\xdef\csname#3:\@@r,\@@j\endcsname{%
+        \csname#2\endcsname\@@i\@@j}
+      \advance\la@j\@ne
+    }%%%
+    \advance\la@i\@ne
+  }%%%
+}
+%%% AppendColMatrix
+%%% AppendColMatrix{A}{B}{C} -> C=(A B)
+%%%
+\def\AppendColMatrix#1#2#3{%%%
+  \def\LA@colA{\csname #1\endcsname01}%%%
+  \def\LA@colB{\csname #2\endcsname01}%%%
+  \la@add\LA@colA\LA@colB\LA@colC
+  \def\LA@rowA{\csname #1\endcsname10}%%%
+  \def\LA@rowB{\csname #2\endcsname10}%%%
+  \ifnum\LA@rowA=\LA@rowB\relax\else\la@error{Number of rows mismatch!}{}\fi
+  \NewMatrix{\LA@rowA}{\LA@colC}{#3}
+  \la@i=0
+  \la@col=\LA@colA\multiply\la@col\m@ne
+  \@whilenum\la@i<\LA@rowA \do{%
+    \la@k\la@i\advance\la@k\@ne\edef\@@i{\number\la@k}
+    \la@j=0
+    \@whilenum\la@j<\LA@colA \do{%
+      \la@l\la@j\advance\la@l\@ne\edef\@@j{\number\la@l}
+      \expandafter\xdef\csname#3:\@@i,\@@j\endcsname{%
+        \csname#1\endcsname\@@i\@@j}
+      \advance\la@j\@ne
+    }
+    \la@j=\LA@colA% k=j+1,l=j+1-col(A)
+    \@whilenum\la@j<\LA@colC \do{%
+      \la@k\la@j\advance\la@k\@ne\la@l\la@k\advance\la@l\la@col
+      \edef\@@j{\number\la@k}\edef\@@l{\number\la@l}%%%
+      \expandafter\xdef\csname#3:\@@i,\@@j\endcsname{%
+        \csname#2\endcsname\@@i\@@l}
+      \advance\la@j\@ne
+    }
+    \advance\la@i\@ne
+  }
+}
+%%% SubMatrix
+%%% SubMatrix{ORG}{r1}{c1}{r2}{c2}{MAT} -> MAT=(ORG_ij|r1<=i<=r2,c1<=j<=c2)
+%%%
+\def\SubMatrix#1#2#3#4#5#6{%%%
+  \def\tmp@r@ne{#2}\def\tmp@c@ne{#3}%%%
+  \def\tmp@rtw@{#4}\def\tmp@ctw@{#5}%%%
+  \la@row=\tmp@rtw@%
+  \la@p=\tmp@r@ne%
+  \multiply\la@p\m@ne\advance\la@row\la@p
+  \advance\la@row\@ne
+  \la@col=\tmp@ctw@%
+  \la@q=\tmp@c@ne%
+  \multiply\la@q\m@ne\advance\la@col\la@q
+  \advance\la@col\@ne
+  % Debug: Target Matrix size: \the\la@row,\the\la@col
+  \NewMatrix{\number\la@row}{\number\la@col}{#6}%%%
+  \advance\la@row\@ne
+  \advance\la@col\@ne
+  \la@i=1\relax \la@p=\tmp@r@ne
+  \@whilenum \la@i < \la@row \do {%
+    \la@j=1
+    \la@q=\tmp@c@ne
+    \@whilenum \la@j < \la@col \do {%
+      \csname set#6\endcsname{\number\la@i}{\number\la@j}{%
+        \csname #1\endcsname{\number\la@p}{\number\la@q}}
+      \advance\la@j\@ne
+      \advance\la@q\@ne
+    }
+    \advance\la@i\@ne
+    \advance\la@p\@ne
+  }
+}
+%%% Transpose: OK
+%%% Transpose{A}{B} -> B = A^T
+%%%
+\def\Transpose#1#2{%%%
+  \def\LA@col{\csname#1\endcsname10}\la@col\LA@col\advance\la@col\@ne%%%
+  \def\LA@row{\csname#1\endcsname01}\la@row\LA@row\advance\la@row\@ne%%%
+  \NewMatrix{\LA@row}{\LA@col}{#2}%%%
+  \la@i=1\relax \@whilenum \la@i < \la@row \do{%
+    \la@j=1%
+    \edef\@@i{\number\la@i}%%%
+    \@whilenum \la@j < \la@col \do{%%%
+      \edef\@@j{\number\la@j}%%%
+      \csname set#2\endcsname\@@i\@@j{\csname#1\endcsname\@@j\@@i}%%%
+      \advance\la@j\@ne
+    }%%%
+    \advance\la@i\@ne
+  }
+}  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Arithmetic (or else) operations are required below
+%%% \@ifundefined{pgyouretu}% emath identify 
+%%%  OR option specified only (ToDo)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \@ifundefined{pgyouretu}{%%% emath not included/ use iMath QAdd etc.
+%   \let\LAadd\QAdd
+%   \let\LAsub\QSub
+%   \let\LAmul\QMul
+%   \let\LAdiv\QDiv
+% }{%%% emath included
+%   \let\LAadd\FAdd
+%   \let\LAsub\FSub
+%   \let\LAmul\FMul
+%   \let\LAdiv\FDiv
+% }
+%%%% Random Integer macro
+\@ifundefined{ZRand}{\global\let\LArand\la@rand}{\global\let\LArand\ZRand}
+\@ifundefined{Ransuu}{}{\global\let\LArand\IRand}
+% \fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Arithmetics of Matrix 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% AddMatrix  (MatAdd (alias)
+%%% AddMatrix{A}{B}{C} -> C = A+B
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\AddMatrix#1#2#3#4{%  #1+#2=#3 via #4add
+  \edef\LA@rowA{\csname #1\endcsname10}%%%
+  \edef\LA@rowB{\csname #2\endcsname10}%%%
+  \edef\LA@colA{\csname #1\endcsname01}%%%
+  \edef\LA@colB{\csname #2\endcsname01}%%%
+  \ifnum\LA@rowA=\LA@rowB\relax\else\la@error{Type mismatch!:row}{}\fi
+  \ifnum\LA@colA=\LA@colB\relax\else\la@error{Type mismatch!:col}{}\fi
+  \NewMatrix{\LA@rowA}{\LA@colA}{#3}%%%
+  \la@row\LA@rowA\advance\la@row\@ne
+  \la@col\LA@colA\advance\la@col\@ne
+  \la@i=1\relax \@whilenum \la@i < \la@row \do {%
+    \edef\@@i{\number\la@i}%%%
+    \la@j=1
+    \@whilenum \la@j < \la@col \do {%
+      \edef\@@j{\number\la@j}%%%
+      \edef\LA@va{\csname#1\endcsname\@@i\@@j}%%%
+      \edef\LA@vb{\csname#2\endcsname\@@i\@@j}%%%
+      \csname #4Add\endcsname\LA@va\LA@vb\LA@vc%%%
+      % \csname LAadd\endcsname\LA@va\LA@vb\LA@vc%%%
+      \csname set#3\endcsname{\@@i}{\@@j}{\LA@vc}
+      \advance\la@j\@ne
+    }      
+    \advance\la@i\@ne
+  }
+}      
+\def\QMatAdd#1#2#3{\AddMatrix{#1}{#2}{#3}{Q}}
+\def\ZMatAdd#1#2#3{\AddMatrix{#1}{#2}{#3}{Z}}
+\let\MatAdd\QMatAdd
+%%% SubtractMatrix (alias: MatSub) 
+%%% SubtractMatrix{A}{B}{C} -> C = A-B
+%%% Caution!  Don't abuse SubMatrix which is subset of matrix
+\def\SubtractMatrix#1#2#3#4{%  #1+#2=#3
+  \edef\LA@rowA{\csname #1\endcsname10}
+  \edef\LA@rowB{\csname #2\endcsname10}
+  \edef\LA@colA{\csname #1\endcsname01}
+  \edef\LA@colB{\csname #2\endcsname01}
+  \ifnum\LA@rowA=\LA@rowB\relax\else\la@error{Type mismatch!:row}{}\fi
+  \ifnum\LA@colA=\LA@colB\relax\else\la@error{Type mismatch!:col}{}\fi
+  \NewMatrix{\LA@rowA}{\LA@colA}{#3}
+  \la@row\LA@rowA\advance\la@row\@ne
+  \la@col\LA@colA\advance\la@col\@ne
+  \la@i=1\relax \@whilenum \la@i < \la@row \do {%
+    \edef\@@i{\number\la@i}
+    \la@j=1
+    \@whilenum \la@j < \la@col \do {%
+      \edef\@@j{\number\la@j}
+      \edef\LA@va{\csname#1\endcsname\@@i\@@j}
+      \edef\LA@vb{\csname#2\endcsname\@@i\@@j}
+      \csname #4Sub\endcsname\LA@va\LA@vb\LA@vc
+      \csname set#3\endcsname{\@@i}{\@@j}{\LA@vc}
+      \advance\la@j\@ne
+    }      
+    \advance\la@i\@ne
+  }
+}      
+\def\QMatSub#1#2#3{\SubtractMatrix{#1}{#2}{#3}{Q}}
+\def\ZMatSub#1#2#3{\SubtractMatrix{#1}{#2}{#3}{Z}}
+\let\MatSub\QMatSub
+%%%
+%%% MultiplyMatrix
+%%% MultiplyMatrix{A}{B}{C} -> C = A*B
+%%% 
+\def\MultiplyMatrix#1#2#3#4{%  #1*#2=#3
+  \edef\LA@rowA{\csname #1\endcsname10}
+  \edef\LA@rowB{\csname #2\endcsname10}
+  \edef\LA@colA{\csname #1\endcsname01}
+  \edef\LA@colB{\csname #2\endcsname01}
+  \ifnum\LA@colA=\LA@rowB\relax\else\la@error{Product not defiend!}{}\fi
+  \NewMatrix{\LA@rowA}{\LA@colB}{@MM@TMP}
+  \la@row\LA@rowA\advance\la@row\@ne
+  \la@col\LA@colB\advance\la@col\@ne
+  \la@i=1\relax \@whilenum \la@i < \la@row \do {
+    \edef\@@i{\number\la@i}
+    \la@j=1
+    \@whilenum \la@j < \la@col \do {
+      \edef\@@j{\number\la@j}
+      \def\tmp@val{0}
+      \la@k=1\la@r\LA@colA\advance\la@r\@ne
+      \@whilenum \la@k < \la@r \do {
+        \edef\@@k{\number\la@k}
+        \edef\LA@p{\csname#1\endcsname\@@i\@@k}
+        \edef\LA@q{\csname#2\endcsname\@@k\@@j}
+        % \la@p \csname#1\endcsname\@@i\@@k
+        % \la@q \csname#2\endcsname\@@k\@@j
+        % \multiply\la@p by \la@q\advance\la@vc\la@p
+        \csname #4Mul\endcsname\LA@p\LA@q\LA@p
+        \csname #4Add\endcsname\tmp@val\LA@p\tmp@val
+        \advance\la@k\@ne
+      }
+      % \edef\tmp@val{\number\la@vc}
+      % \csname set@MM@TMP\endcsname\@@i\@@j{\tmp@val}
+      \csname set@MM@TMP\endcsname\@@i\@@j{\tmp@val}
+      \advance\la@j\@ne
+    }      
+    \advance\la@i\@ne
+  }
+  \SubstMatrix{@MM@TMP}{#3}
+}      
+\def\QMatMul#1#2#3{\MultiplyMatrix{#1}{#2}{#3}{Q}}
+\def\ZMatMul#1#2#3{\MultiplyMatrix{#1}{#2}{#3}{Z}}
+\let\MatMul\QMatMul
+%%% ScalarMultiple
+%%% ScalarMultiple{s}{A}{B} -> B = sA
+%%%
+\def\ScalarMultiple#1#2#3{
+  % \edef\la@p{#1}
+  \expandafter\la@row\csname #2\endcsname10
+  \expandafter\la@col\csname #2\endcsname01
+  \NewMatrix{\number\la@row}{\number\la@col}{#3}% zero matrix 
+  \advance\la@row\@ne\advance\la@col\@ne
+  \la@i=1\relax \@whilenum \la@i < \la@row \do{%
+    \edef\@@i{\number\la@i}
+    \la@j=1
+    \@whilenum \la@j < \la@col \do{%
+      \edef\@@j{\number\la@j}
+      \expandafter\la@cf\csname #2\endcsname\@@i\@@j
+      \multiply\la@cf by #1
+      \csname set#3\endcsname\@@i\@@j{\number\la@cf}
+      \advance\la@j\@ne
+    }
+    \advance\la@i\@ne
+  }
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%    Elementary Matrix for the transformatoions    %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% P_n(i,j;c) type
+%%%
+\def\ElementaryMatrixP#1#2#3#4#5{% #5 = #1-size, (#2,#3) element = #4
+  \IdentityMatrix{#1}{#5}
+  \csname set#5\endcsname{#2}{#3}{#4}
+}
+%%% Q_n(i;c) type
+%%%
+\def\ElementaryMatrixQ#1#2#3#4{% #4 = #1-size, (#2,#2) element = #4
+  \IdentityMatrix{#1}{#4}
+  \csname set#4\endcsname{#2}{#2}{#3}
+}
+%%% R_n(i,j) type
+%%% 
+\def\ElementaryMatrixR#1#2#3#4{% #4 = #2-#3 exchanged identity matrix
+  \IdentityMatrix{#1}{#4}
+  \csname set#4\endcsname{#2}{#3}{1}
+  \csname set#4\endcsname{#3}{#2}{1}
+  \csname set#4\endcsname{#2}{#2}{0}
+  \csname set#4\endcsname{#3}{#3}{0}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PariMatDet
+%%% PariMatDet{Mat} -> Determinant of Mat
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\PariMatDet#1#2{% #2 = Determinant of #1
+  \PariMatrix{#1}{mat@form}
+  \begingroup\makeatletter\endlinechar=\m@ne\everyeof{\noexpand}
+  \edef\x{\endgroup\def\noexpand#2{\@@input|"echo 'matdet([\mat@form])'|gp -q" }}\x
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% RowAdd#1#2#3#4{Add row #1 = #1 + #3*(row #2) of matrix #4
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\RowAdditionSelf#1#2#3#4#5{%%% RowAdd in #5=Z or Q
+  \expandafter\la@row\csname #4:1,0\endcsname\relax
+  \expandafter\la@col\csname #4:0,1\endcsname\relax
+  \la@i#1\relax\la@j#2\relax\la@k1\relax
+  \def\@@i{\number\la@i}\def\@@j{\number\la@j}%%%
+  \def\@@c{#3}%%%
+  \la@max\number\la@col\relax\advance\la@max\@ne
+  \@whilenum \la@k < \number\la@max\do {%%%
+    \def\@@k{\number\la@k}%%%
+    \def\@@aik{\csname #4:\@@i,\@@k\endcsname}%%%
+    \def\@@ajk{\csname #4:\@@j,\@@k\endcsname}%%%
+    \csname #5Mul\endcsname\@@c\@@ajk\@@ajk%%%
+    \csname #5Add\endcsname\@@aik\@@ajk\@@aik%%%
+    \csname set#4\endcsname\@@i\@@k\@@aik%%%
+    \advance\la@k\@ne
+  }%%%
+}
+\def\RowAddition#1#2#3#4#5#6{%%% #4 -> #5 in the world #6
+  \CopyMatrix{#4}{#5}%%%
+  \RowAdditionSelf{#1}{#2}{#3}{#5}{#6}%%%
+}
+\def\QRowAdd#1#2#3#4#5{
+  \RowAddition{#1}{#2}{#3}{#4}{#5}{Q}
+}
+\def\ZRowAdd#1#2#3#4#5{
+  \RowAddition{#1}{#2}{#3}{#4}{#5}{Z}
+}
+\let\RowAdd\QRowAdd%%% default in Q
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% \RowMultiplication
+%%%%% row #1 = #2 * row #1 of #3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\RowMultiplicationSelf#1#2#3#4{%%% RowMult in #4=Z or Q
+  \expandafter\la@row\csname #3:1,0\endcsname\relax
+  \expandafter\la@col\csname #3:0,1\endcsname\relax
+  \la@i#1\relax\la@k1\relax
+  \def\@@i{\number\la@i}\def\@@c{#2}%%%
+  \la@max\number\la@col\relax\advance\la@max\@ne
+  \@whilenum \la@k < \number\la@max\do {%%%
+    \def\@@k{\number\la@k}%%%
+    \def\@@aik{\csname #3:\@@i,\@@k\endcsname}%%%
+    \csname #4Mul\endcsname\@@c\@@aik\@@aik%%%
+    \csname set#3\endcsname\@@i\@@k\@@aik%%%
+    \advance\la@k\@ne
+  }%%%
+}
+\def\RowMultiplication#1#2#3#4#5{%%% #3 -> #4 in the world #5
+  \CopyMatrix{#3}{#4}%%%
+  \RowMultiplicationSelf{#1}{#2}{#4}{#5}}
+\def\QRowMul#1#2#3#4{%%%
+  \RowMultiplication{#1}{#2}{#3}{#4}{Q}}
+\def\ZRowMul#1#2#3#4{%%%
+  \RowMultiplication{#1}{#2}{#3}{#4}{Z}}
+\let\RowMul\QRowMul%%% default in Q
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% RowChange#1#2#3{Add row #1 <-> #2 of #3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\RowChangeSelf#1#2#3{%%% RowAdd in #5=Z or Q
+  \expandafter\la@row\csname #3:1,0\endcsname\relax
+  \expandafter\la@col\csname #3:0,1\endcsname\relax
+  \la@i#1\relax\la@j#2\relax\la@k1\relax
+  \def\@@i{\number\la@i}\def\@@j{\number\la@j}%%%
+  \def\@@c{#3}%%%
+  \la@max\number\la@col\relax\advance\la@max\@ne
+  \@whilenum \la@k < \number\la@max\do {%%%
+    \def\@@k{\number\la@k}%%%
+    \edef\@@aik{\csname #3:\@@i,\@@k\endcsname}%%%
+    \edef\@@ajk{\csname #3:\@@j,\@@k\endcsname}%%%
+    \csname set#3\endcsname\@@i\@@k\@@ajk%%%
+    \csname set#3\endcsname\@@j\@@k\@@aik%%%
+    \advance\la@k\@ne
+  }%%%
+}
+\def\RowChange#1#2#3#4{%%% #3  - (row change) > #4 
+  \CopyMatrix{#3}{#4}%%%
+  \RowChangeSelf{#1}{#2}{#4}%%%
+}
+% \def\QRowAdd#1#2#3#4#5{
+%   \RowAddition{#1}{#2}{#3}{#4}{#5}{Q}
+% }
+% \def\ZRowAdd#1#2#3#4#5{
+%   \RowAddition{#1}{#2}{#3}{#4}{#5}{Z}
+% }
+\let\RowChg\RowChange%%% default in Q
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% GetDetOneMatrix
+%%% GetDetOneMatrix{n}{A}{X} -> AX=XA=E_n, |A| = 1
+%%%
+\def\GetDetOneMatrix#1#2#3{% #2,#3 is det=1 matrix of size #1x#1, #2#3=E_#1
+  \def\LA@deg{#1}\LAsub\LA@deg1\LA@degm@ne%%%
+  \if{#2}{#3}\la@error{2nd and 3rd argument must differ}{}\fi
+  \ifnum #1<3 \la@error{#1 should be greater than 2}{}\fi
+  \IdentityMatrix{#1}{#2}{tmp@MP}%
+  \IdentityMatrix{#1}{#3}{tmp@MX}%
+  \LArand{-1}{1}\LA@va\LAmul\LA@va{-1}\LA@ma
+  \LArand{1}{\LA@deg}\LA@i
+  \LArand{1}{\LA@degm@ne}\LA@p\la@add\LA@i\LA@p\LA@j\LAmod\LA@j\LA@deg\LA@j
+  \LArand{1}{#1}\LA@j\ifnum\LA@j=\LA@i 
+
+  %%% Not implemented
+  \LArand{-1}{1}\LA@vb
+  \LArand{-1}{1}\LA@vc
+  \ElementaryMatrixP{#1}{}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                                       %%%
+%%%  Permutation/Symmetric Group related  %%%
+%%%                                       %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\NewPermutation#1#2{% Declare 1..#1 permutation #2
+  \expandafter\xdef\csname #2:0\endcsname{#1}% \#2:0 = size
+  \la@deg=#1\la@i=1\relax
+  \advance\la@deg\@ne
+  \@whilenum \la@i<\la@deg \do{%
+    \edef\@@i{\number\la@i}
+    \expandafter\xdef\csname #2:\@@i\endcsname{\@@i}
+    \advance\la@i\@ne
+  }
+  \expandafter\gdef\csname #2\endcsname##1{%
+    \csname #2:##1\endcsname
+  }
+  \expandafter\gdef\csname get#2\endcsname##1{%
+    \csname #2:##1\endcsname
+  }
+  \expandafter\gdef\csname set#2\endcsname##1##2{
+    \expandafter\xdef\csname #2:##1\endcsname{##2}
+  }
+}
+\let\IdentityPermutation\NewPermutation
+\def\EmbedPermutation#1#2{% degree of #2 enlarge to degree=#1
+  \la@p=\csname get#2\endcsname0
+  \la@q=#1
+  \ifnum \la@q > \la@p
+  \edef\tmp@val{\number\la@q}
+  \csname set#2\endcsname{0}{\tmp@val}%
+  \advance\la@q\@ne
+  \la@i=\la@p
+  \advance\la@i\@ne
+  \@whilenum \la@i < \la@q \do {
+    \csname set#2\endcsname{\number\la@i}{\number\la@i}
+    \advance\la@i\@ne
+  }
+  \fi
+}
+%%% Transposition{i}{j}{s}
+%%% if s not defined => exchange s(i), s(j)
+%%%             else => s = (i j)
+%%%
+\def\Transposition#1#2#3{% #3 = (#1,#2)
+  \la@p=#1\la@q=#2
+  \ifnum\la@p=\la@q \la@error{Incorrect arguments!}{}\fi
+  \ifnum\la@p>\la@q 
+  \la@p=#2\la@q=#1 \fi% p < q
+  \ifcsname #3\endcsname
+  \EmbedPermutation{\number\la@q}{#3}
+  \else% \ifcsname #3\endcsname
+  \NewPermutation{\number\la@q}{#3}
+  \fi
+  \la@va=\csname get#3\endcsname{#1}
+  \la@vb=\csname get#3\endcsname{#2}
+  \csname set#3\endcsname{#1}{\number\la@vb}
+  \csname set#3\endcsname{#2}{\number\la@va}
+}
+%%% 
+%%% \PermutationProd
+%%%
+\def\PermutationProd#1#2#3{% #1\circ #2 = #3
+  \la@va=\csname get#1\endcsname0
+  \la@vb=\csname get#2\endcsname0
+  \ifnum\la@va > \la@vb \la@deg=\la@va
+  \else \la@deg=\la@vb \fi
+  \edef\prod@tmp{\number\la@deg}
+  \NewPermutation{\prod@tmp}{#3}
+  \EmbedPermutation{\prod@tmp}{#1}
+  \EmbedPermutation{\prod@tmp}{#2}
+  \la@deg=\prod@tmp
+  \advance\la@deg\@ne
+  \la@i=1\relax \@whilenum \la@i < \la@deg \do {%
+    \la@p=\csname get#2\endcsname{\number\la@i}
+    \la@q=\csname get#1\endcsname{\number\la@p}
+    \csname set#3\endcsname{\number\la@i}{\number\la@q}
+    \advance\la@i\@ne
+  }
+}
+\let\PermProd\PermutationProd
+%%%
+%%% \GetRandomPermutation[#1]#2#3#4
+%%% #1: minimum "HantenSuu", #2:degree,#3:Seq csname,#4:Hantensuu csname
+%%% [#1] argument does not work currently.
+\def\GetRandomPermutation{\@ifnextchar[{\@GetRandomPermutation}{\@GetRandomPermutation[3]}}
+\def\@GetRandomPermutation[#1]#2#3#4{%
+  \NewPermutation{#2}{#3}%
+  \def\@deg{#2}%
+  \la@sub\@deg1\@degmo% degmo = deg-1
+  \edef\@grp@loop{\@deg}\la@mul\@grp@loop3\@grp@loop@base
+  \la@mul\@grp@loop6\@grp@loop@max%
+  \la@rand\@grp@loop@base\@grp@loop@max\@grp@loop
+  % Debug: \number\@degmo
+  \la@i=1\relax \la@cf=0\relax
+  \@whilenum \la@i < \@grp@loop \do {%
+    \la@rand1\@degmo\@k\la@add\@k1\@kpo% k = random(1...p=deg-1),kpo=k+1
+    % Debug: \@k,\@kpo
+    \la@va=\csname get#3\endcsname{\@k}
+    \la@vb=\csname get#3\endcsname{\@kpo}
+    \ifnum\la@va > \la@vb \advance\la@cf\m@ne%
+    \else \advance\la@cf\@ne\fi%
+    \Transposition{\@k}{\@kpo}{#3}
+    \advance\la@i\@ne%
+  }
+  \expandafter\xdef\csname #4\endcsname{\number\la@cf}
+  % \ifnum\la@cf<#1\expandafter\@firstofone
+  % \fi {\GetRandomPermutation[#1]{#2}{#3}{#4}}%
+}
+%%%
+%%% \PermutationToCSV
+%%%
+\def\PermutationToCSV#1#2{% #1:Perm var #2: Comma Separated Value e.g.3,4,2,..
+  \ifcsname #1\endcsname \relax\else \la@error{Undefined variable!}{}\fi
+  \la@max=\csname get#1\endcsname0
+  \advance\la@max\@ne
+  \la@i=1\relax \def\tmp@str{}
+  \@whilenum \la@i < \la@max \do {%
+    \edef\tmp@val{\csname get#1\endcsname{\number\la@i}}
+    \edef\tmp@add{%
+      \ifnum\la@i=1
+        \expandafter\@firstoftwo
+      \else
+        \expandafter\@secondoftwo
+      \fi
+      {\tmp@val}{,\tmp@val}
+    }
+    \edef\tmp@str{\tmp@str\tmp@add}
+    \advance\la@i\@ne
+  }
+  \expandafter\xdef\csname #2\endcsname{\tmp@str}
+}
+%%%
+%%% \PermutationToAlign
+%%%
+\def\PermutationToAlign#1#2{% #1:Perm va, #2: alignment tab string
+  \ifcsname #1\endcsname \relax\else \la@error{Undefined variable!}{}\fi
+  \la@max=\csname get#1\endcsname0
+  \advance\la@max\@ne
+  \la@i=1\relax\def\tmp@str{}
+  \@whilenum \la@i < \la@max \do {%
+    \edef\tmp@val{\number\la@i}
+    \def\tmp@add{%
+      \ifnum\la@i=1
+        \expandafter\@firstoftwo
+      \else
+        \expandafter\@secondoftwo
+      \fi
+      {\tmp@val}{&\tmp@val}
+    }
+    \edef\tmp@str{\tmp@str\tmp@add}
+    \advance\la@i\@ne
+  }
+  \edef\tmp@str{\tmp@str \crcr}
+  \la@i=1\relax \@whilenum \la@i < \la@max \do {%
+    \edef\tmp@val{\csname get#1\endcsname{\number\la@i}}
+    \def\tmp@add{
+      \ifnum\la@i=1
+        \expandafter\@firstoftwo
+      \else
+        \expandafter\@secondoftwo
+      \fi
+      {\tmp@val}{&\tmp@val}
+    }
+    \edef\tmp@str{\tmp@str\tmp@add}
+    \advance\la@i\@ne
+  }
+  \expandafter\xdef\csname#2\endcsname{\tmp@str}
+}
+%%%
+%%% \DspPermutationFull (FullForm?)
+%%% 
+\def\DspPermutationFull#1{
+  \PermutationToAlign{#1}{DPF@tmp@str}
+  \ensuremath{\left(\org@matrix{\DPF@tmp@str}\right)}
+}
+\let\PermAlign\PermutationAlign
+%%%
+%%% \SetPermutationMatrix#1#2 #2 = perm matrix corr. to permutation #1
+%%% 
+\def\SetPermutationMatrix#1#2{%
+  \la@max=\csname get#1\endcsname0
+  \edef\@@deg{\number\la@max}
+  \NewMatrix{\@@deg}{\@@deg}{#2}% zero matrix #2 defined
+  \advance\la@max\@ne
+  \la@i=1\relax\@whilenum \la@i < \la@max \do {%
+    \def\@@j{\number\la@i}%
+    \def\@@i{\csname get#1\endcsname{\@@j}}% 
+    \csname set#2\endcsname{\@@i}{\@@j}1%
+    \advance\la@i\@ne
+  }
+}
+
+\makeatother
+%%%
+%%% EOF
+%%%
+\endinput
