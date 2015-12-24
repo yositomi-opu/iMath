@@ -363,13 +363,14 @@
   \NewMatrix{\tmp@row}{\tmp@col}{#2}\relax
   \expandafter\SetMatrix\expandafter{\tmp@arg}{#2}
 }
+\NewMatrix{30}{30}{CSSV@TMP}
 \long\def\CSSVmatrix#1{%
-  @CSSVtoMatrix{#1}{LA:HOGE}%
-  \DspMatrix{LA:HOGE}
+  \@CSSVtoMatrix{#1}{CSSV@TMP}%
+  \DspMatrix{CSSV@TMP}
 }
 \long\def\CSSVpmatrix#1{%
-  @CSSVtoMatrix{#1}{LA:HOGE}%
-  \DspPMatrix{LA:HOGE}
+  \@CSSVtoMatrix{#1}{CSSV@TMP}%
+  \DspPMatrix{CSSV@TMP}
 }
 \let\CSVmatrix\CSSVmatrix
 \let\CSVpmatrix\CSSVpmatrix
