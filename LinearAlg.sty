@@ -280,71 +280,70 @@
 %%%
 % NewMatrix: all zero entry
 \def\NewMatrix#1#2#3{% Declare #1x#2 matrix #3
-  \la@i=0\la@j=0\edef\@@i{\number\la@i}\edef\@@j{\number\la@j}
-  \la@k=1\la@l=1\edef\@@k{\number\la@k}\edef\@@l{\number\la@l}
+  \la@i=0\la@j=0\edef\@@i{\number\la@i}\edef\@@j{\number\la@j}%
+  \la@k=1\la@l=1\edef\@@k{\number\la@k}\edef\@@l{\number\la@l}%
   \expandafter\xdef\csname #3:type\endcsname{IntegerMatrix}% 0,0=row,col
   \expandafter\xdef\csname #3:typeid\endcsname{11}% 0,0=row,col
   \expandafter\xdef\csname #3:\@@i,\@@j\endcsname{#1,#2}% 0,0=row,col
   \expandafter\xdef\csname #3:\@@i,\@@l\endcsname{#2}% 0,1 = col
   \expandafter\xdef\csname #3:\@@k,\@@j\endcsname{#1}% 1,0 = row
-  \la@row=#1\advance\la@row\@ne\advance\la@i\@ne
-  \la@col=#2\advance\la@col\@ne\advance\la@j\@ne
+  \la@row=#1\advance\la@row\@ne\relax\advance\la@i\@ne\relax%
+  \la@col=#2\advance\la@col\@ne\relax\advance\la@j\@ne\relax%
   \@whilenum \la@i<\la@row \do{%
-    \la@j=1
+    \la@j=1%
     \@whilenum \la@j<\la@col \do{%
-      \edef\@@i{\number\la@i}\edef\@@j{\number\la@j}
-      \expandafter\xdef\csname #3:\@@i,\@@j\endcsname{0}
-      \advance\la@j\@ne
-    }
-    \par
-    \advance\la@i\@ne
-  }
+      \edef\@@i{\number\la@i}\edef\@@j{\number\la@j}%
+      \expandafter\xdef\csname #3:\@@i,\@@j\endcsname{0}%
+      \advance\la@j\@ne\relax%
+    }%
+    \advance\la@i\@ne\relax%
+  }%
   \expandafter\gdef\csname #3\endcsname##1##2{%
-    \csname #3:##1,##2\endcsname
-  }
+    \csname #3:##1,##2\endcsname%
+  }%
   \expandafter\gdef\csname get#3\endcsname##1##2{%
-    \csname #3:##1,##2\endcsname
-  }
-  \expandafter\gdef\csname set#3\endcsname##1##2##3{
-    \expandafter\xdef\csname #3:##1,##2\endcsname{##3}
-  }
+    \csname #3:##1,##2\endcsname%
+  }%
+  \expandafter\gdef\csname set#3\endcsname##1##2##3{%
+    \expandafter\xdef\csname #3:##1,##2\endcsname{##3}%
+  }%
 }
 %%%
 %%% Identity Matrix 
 %%%
 \def\IdentityMatrix#1#2{% Defind #1x#1 identity matrix #2
   \DeclareMatrix{#1}{#1}{#2}% zero matrix 
-  \la@i=1\la@k=#1\relax\advance\la@k\@ne
+  \la@i=1\la@k=#1\relax\advance\la@k\@ne\relax%
   \@whilenum \la@i<\la@k \do{%
-    \edef\@@i{\number\la@i}
-    \expandafter\xdef\csname #1:\@@i,\@@i\endcsname{1}
-    \advance\la@i\@ne
-  }
-}
+    \edef\@@i{\number\la@i}%
+    \expandafter\xdef\csname #1:\@@i,\@@i\endcsname{1}%
+    \advance\la@i\@ne\relax%
+  }%
+}%
 %%% Chk #1 is already defined?
-\def\la@chkdefined#1#2{
-  \def\@result{0}
-  \ifcsname #1:0,0\endcsname\relax\else\def\@result{1}\fi
-  \ifcsname #1:0,1\endcsname\relax\else\def\@result{1}\fi
-  \ifcsname #1:1,0\endcsname\relax\else\def\@result{1}\fi
-  \ifcase\@result\relax\else
+\def\la@chkdefined#1#2{%
+  \def\@result{0}%
+  \ifcsname #1:0,0\endcsname\relax\else\def\@result{1}\fi%
+  \ifcsname #1:0,1\endcsname\relax\else\def\@result{1}\fi%
+  \ifcsname #1:1,0\endcsname\relax\else\def\@result{1}\fi%
+  \ifcase\@result\relax\else%
   \la@error{Before using \\#2, first define it via \\NewMatrix}%
-  {\\NewMatrix{row}{col}{#2}}\fi
-}
+  {\\NewMatrix{row}{col}{#2}}\fi%
+}%
 %%% Set Matrix : before use , define matrix by NewMatrix.
 \def\SetMatrix#1#2{% Set elements of #2 by #1 parameter 1000100 etc.
-  \la@chkdefined{#2}{SetMatrix}
+  \la@chkdefined{#2}{SetMatrix}%
   \la@row \csname #2:1,0\endcsname%
-  \la@col \csname #2:0,1\endcsname\advance\la@col\@ne
+  \la@col \csname #2:0,1\endcsname\advance\la@col\@ne\relax%
   \la@i=1\la@j=1\relax%
   \@tfor \tmp@val:=#1\do{%
     % \la@k \la@i\advance\la@k\@ne
     % \la@l \la@j\advance\la@l\@ne
-    \def\@@i{\number\la@i}\def\@@j{\number\la@j}
+    \def\@@i{\number\la@i}\def\@@j{\number\la@j}%
     \expandafter\xdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}%
-    \advance\la@j\@ne
-    \ifnum\la@j=\la@col\la@j=1\advance\la@i\@ne\fi
-  }
+    \advance\la@j\@ne%
+    \ifnum\la@j=\la@col\la@j=1\advance\la@i\@ne\fi%
+  }%
 }
 %%% CSSVtoMatrix: Comma/Semicolon Separated format (pgyouretu/pari) to Matrix
 \def\@CSSVtoMatrix#1#2{% #1={1,2,3;4,5,6}, #2=Matrix node
@@ -352,28 +351,29 @@
   \def\tmp@arg{}\relax%
   \sc@for\r@i:=#1\do{%
     \la@j=0\relax%
-    \expandafter\@for\expandafter\tmp@ij\expandafter:\expandafter=\r@i \do{%
+    \expandafter\@for\expandafter\tmp@ij\expandafter:\expandafter=\r@i\do{%
       \edef\tmp@arg{\tmp@arg{\tmp@ij}}%
       \advance\la@j\@ne\relax%
     }%
     \advance\la@i\@ne\relax%
   }%
   % DEBUG: \the\la@i, \the\la@j, \tmp@arg \par%
-  \edef\tmp@row{\the\la@i}\edef\tmp@col{\the\la@j}%
-  \NewMatrix{\tmp@row}{\tmp@col}{#2}\relax
-  \expandafter\SetMatrix\expandafter{\tmp@arg}{#2}
-}
-\NewMatrix{30}{30}{CSSV@TMP}
-\long\def\CSSVmatrix#1{%
+  \edef\tmp@row{\the\la@i}%
+  \edef\tmp@col{\the\la@j}%
+  \NewMatrix{\tmp@row}{\tmp@col}{#2}\relax%
+  \expandafter\SetMatrix\expandafter{\tmp@arg}{#2}%
+}%
+\NewMatrix{30}{30}{CSSV@TMP}%
+\newcommand{\CSSVmatrix}[1]{%
   \@CSSVtoMatrix{#1}{CSSV@TMP}%
-  \DspMatrix{CSSV@TMP}
-}
-\long\def\CSSVpmatrix#1{%
+  \DspMatrix{CSSV@TMP}%
+}%
+\newcommand{\CSSVpmatrix}[1]{%
   \@CSSVtoMatrix{#1}{CSSV@TMP}%
-  \DspPMatrix{CSSV@TMP}
-}
-\let\CSVmatrix\CSSVmatrix
-\let\CSVpmatrix\CSSVpmatrix
+  \DspPMatrix{CSSV@TMP}%
+}%
+\let\CSVmatrix\CSSVmatrix%
+\let\CSVpmatrix\CSSVpmatrix%
 %%% Substitute Matrix \SubstMatrix{OLD}{NEW} \NEWaa=\OLaa,...,\NEWcd=\OLDcd
 %%% #1 is always the targe object. #1 = #2
 %%% NewMatrix not needed!
@@ -438,18 +438,13 @@
   \fi
   % \ensuremath{\org@matrix{\mathstrut\RepMatrix{#1}}}
 }
-\long\def\DspPMatrix#1{%%% Normal Paren'd matrix
-  \ifmmode\left(\begin{matrix}
-    \RepMatrix{#1}
-  \end{matrix}\right)%
-  \else
-  $\left(\begin{matrix}
-    \RepMatrix{#1}
-  \end{matrix}\right)$
-  \fi
+\newcommand{\DspPMatrix}[1]{%%% Normal Paren'd matrix
+  \ensuremath{\left(\begin{matrix}%
+    \RepMatrix{#1}%
+  \end{matrix}\right)}%
   % \ensuremath{\left(\org@matrix{\mathstrut\RepMatrix{#1}}\right)}
-}
-\long\def\DspDMatrix#1{%%% Determinant format
+}%
+\def\DspDMatrix#1{%%% Determinant format
   \ifmmode\left|\begin{matrix}
     \RepMatrix{#1}
   \end{matrix}\right|%
