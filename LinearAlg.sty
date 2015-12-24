@@ -347,20 +347,25 @@
   }
 }
 %%% CSSVtoMatrix: Comma/Semicolon Separated format (pgyouretu/pari) to Matrix
-\def\CSSVtoMatrix#1#2{% #1={1,2,3;4,5,6}, #2=Matrix node
-  \la@i=1\la@j=1\relax
-  \def\tmp@comma{,}\def\tmp@semicolon{;}\relax
-  \def\tmp@arg{}\relax
-  \@tfor \tmp@val:=#1\do{%
-    \ifx\tmp@val\tmp@comma\advance\la@j\@ne\relax DEBUG:comma
-    \else
-    \ifx\tmp@val\tmp@semicolon\advance\la@i\@ne\relax DEBUG:semicolon
-    \def\la@col{\the\la@j}\else
-    \edef\tmp@arg{\tmp@arg{\tmp@val}} DEBUG: \tmp@val
-    \fi\fi
-  }\def\la@row{\the\la@i}\relax
-  \NewMatrix{\la@row}{\la@col}{#2}
-  \SetMatrix{\tmp@arg}{#2}
+\def\@CSSVtoMatrix#1#2{% #1={1,2,3;4,5,6}, #2=Matrix node
+  \la@i=0\relax%
+  \def\tmp@arg{}\relax%
+  \sc@for\r@i:=#1\do{%
+    \la@j=0\relax%
+    \expandafter\@for\expandafter\tmp@ij\expandafter:\expandafter=\r@i \do{%
+      \edef\tmp@arg{\tmp@arg{\tmp@ij}}%
+      \advance\la@j\@ne\relax%
+    }%
+    \advance\la@i\@ne\relax%
+  }%
+  % DEBUG: \the\la@i, \the\la@j, \tmp@arg \par%
+  \edef\tmp@row{\the\la@i}\edef\tmp@col{\the\la@j}%
+  \NewMatrix{\tmp@row}{\tmp@col}{#2}\relax
+  \expandafter\SetMatrix\expandafter{\tmp@arg}{#2}
+}
+\def\CSSVpmatrix#1{%
+  @CSSVtoMatrix{#1}{@TMP}
+  \DspPmatrix{@TMP}
 }
 %%% Substitute Matrix \SubstMatrix{OLD}{NEW} \NEWaa=\OLaa,...,\NEWcd=\OLDcd
 %%% #1 is always the targe object. #1 = #2
@@ -416,21 +421,37 @@
       \mathstrut\crcr\noalign{\kern-\baselineskip}
       #1\crcr\mathstrut\crcr\noalign{\kern-\baselineskip}}}\,}
 \def\DspMatrix#1{%%% Only components arrayed
-  \ifmath\begin{pmatrix}
+  \ifmmode\begin{matrix}
     \RepMatrix{#1}
-  \end{pmatrix}%
+  \end{matrix}%
   \else
-  $\begin{pmatrix}
+  $\begin{matrix}
     \RepMatrix{#1}
-  \end{pmatrix}$
+  \end{matrix}$
   \fi
   % \ensuremath{\org@matrix{\mathstrut\RepMatrix{#1}}}
 }
 \def\DspPMatrix#1{%%% Normal Paren'd matrix
-  \ensuremath{\left(\org@matrix{\mathstrut\RepMatrix{#1}}\right)}
+  \ifmmode\left(\begin{matrix}
+    \RepMatrix{#1}
+  \end{matrix}\right)%
+  \else
+  $\left(\begin{matrix}
+    \RepMatrix{#1}
+  \end{matrix}\right)$
+  \fi
+  % \ensuremath{\left(\org@matrix{\mathstrut\RepMatrix{#1}}\right)}
 }
 \def\DspDMatrix#1{%%% Determinant format
-  \ensuremath{\left|\org@matrix{\mathstrut\RepMatrix{#1}}\right|}
+  \ifmmode\left|\begin{matrix}
+    \RepMatrix{#1}
+  \end{matrix}\right|%
+  \else
+  $\left|\begin{matrix}
+    \RepMatrix{#1}
+  \end{matrix}\right|$
+  \fi
+  % \ensuremath{\left|\org@matrix{\mathstrut\RepMatrix{#1}}\right|}
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% PariMatrix
