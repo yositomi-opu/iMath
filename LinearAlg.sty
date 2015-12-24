@@ -363,10 +363,16 @@
   \NewMatrix{\tmp@row}{\tmp@col}{#2}\relax
   \expandafter\SetMatrix\expandafter{\tmp@arg}{#2}
 }
-\def\CSSVpmatrix#1{%
-  @CSSVtoMatrix{#1}{@TMP}
-  \DspPMatrix{@TMP}
+\long\def\CSSVmatrix#1{%
+  @CSSVtoMatrix{#1}{LA:HOGE}%
+  \DspMatrix{LA:HOGE}
 }
+\long\def\CSSVpmatrix#1{%
+  @CSSVtoMatrix{#1}{LA:HOGE}%
+  \DspPMatrix{LA:HOGE}
+}
+\let\CSVmatrix\CSSVmatrix
+\let\CSVpmatrix\CSSVpmatrix
 %%% Substitute Matrix \SubstMatrix{OLD}{NEW} \NEWaa=\OLaa,...,\NEWcd=\OLDcd
 %%% #1 is always the targe object. #1 = #2
 %%% NewMatrix not needed!
@@ -420,7 +426,7 @@
     \ialign{\hfil$##$\hfil&&\quad\hfil$##$\hfil\crcr
       \mathstrut\crcr\noalign{\kern-\baselineskip}
       #1\crcr\mathstrut\crcr\noalign{\kern-\baselineskip}}}\,}
-\def\DspMatrix#1{%%% Only components arrayed
+\long\def\DspMatrix#1{%%% Only components arrayed
   \ifmmode\begin{matrix}
     \RepMatrix{#1}
   \end{matrix}%
@@ -431,7 +437,7 @@
   \fi
   % \ensuremath{\org@matrix{\mathstrut\RepMatrix{#1}}}
 }
-\def\DspPMatrix#1{%%% Normal Paren'd matrix
+\long\def\DspPMatrix#1{%%% Normal Paren'd matrix
   \ifmmode\left(\begin{matrix}
     \RepMatrix{#1}
   \end{matrix}\right)%
@@ -442,7 +448,7 @@
   \fi
   % \ensuremath{\left(\org@matrix{\mathstrut\RepMatrix{#1}}\right)}
 }
-\def\DspDMatrix#1{%%% Determinant format
+\long\def\DspDMatrix#1{%%% Determinant format
   \ifmmode\left|\begin{matrix}
     \RepMatrix{#1}
   \end{matrix}\right|%
