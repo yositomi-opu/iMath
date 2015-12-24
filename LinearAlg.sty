@@ -454,6 +454,32 @@
   % \ensuremath{\left|\org@matrix{\mathstrut\RepMatrix{#1}}\right|}
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% renewcommand matrix environment (vs. amstex mathcheck)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewenvironment{matrix}{%
+  \env@matrix
+}{%
+  \endarray \hskip -\arraycolsep
+}
+\def\env@matrix{\hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{*\c@MaxMatrixCols c}}
+\newcount\c@MaxMatrixCols \c@MaxMatrixCols=30
+% \def\matrix@check#1{%
+%   \@xp\ifx\csname\@currenvir\endcsname#1%
+%   \else\matrix@error#1%
+%     \@xp\@gobble
+%   \fi
+% }
+% \def\matrix@error#1{%
+%   \@amsmath@err{%
+% Old form `\string#1' should be \string\begin{\@xp\@gobble\string#1}%
+%   }{%
+% `\string#1{...}' is old Plain-TeX syntax whose use is
+% ill-advised in LaTeX.%
+%   }%
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% PariMatrix
 %%% Ouput matrix in the Pari-GP / emath pgyouretu compatible format.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
