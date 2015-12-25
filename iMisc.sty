@@ -281,38 +281,6 @@
     \csname #1:##1\endcsname
   }
 }
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%% emath Extentions              %%%%%
-%%%%% will be moved to emathExt.sty %%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% depend on emath 
-\newcommand{\InsertKaitou}{\closeKaiFile
-  {\footnotesize\noindent【解答】\inputKaiFile}}
-\newcommand{\InsertKaitouVfill}{\closeKaiFile
-  \vfill{\footnotesize\noindent【解答】\inputKaiFile}}
-\newcommand{\InsertKaitouRotate}{\closeKaiFile
-  \vfill{\rotatebox{180}{\parbox[t]{\linewidth}{
-        \footnotesize\noindent【解答】\inputKaiFile}}}}
-%% http://ls-al.jp/blog2/item_1779.html
-\def\XopenKaiFile{
-\newwrite\boostream
-\def\KaiFile{\jobname.csv}
-\immediate\openout\boostream=\KaiFile
-}
-\def\XwriteKaiFile#1{%
-  \edef\myTxt{#1}%
-  \immediate\write\boostream{\myTxt}%
-}
-\def\XcloseKaiFile{
-  \immediate\closeout\boostream%
-}
-
-\def\YopenKaiFile{
-\newwrite\boostream
-\edef\YKaiFile{\jobname-\compiletimeid.csv}
-\immediate\openout\boostream=\YKaiFile
-}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

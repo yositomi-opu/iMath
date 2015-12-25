@@ -1,8 +1,10 @@
 %
 % iMath.sty --- macros for Mathematical computing and printing
 % (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
-\def\iMath@Date{Time-stamp: "2015/12/23"}%
+\def\iMath@Date{Time-stamp: "2015/12/25"}%
 \def\iMath@Revision{0.91b}%
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
 % \def\@get@rev Time-stamp: "#1"\relax{\gdef\@time@{#1}}%
 % \expandafter\@get@rev \iMath@Date\relax%
 % \ProvidesPackage{iMath}[\@year@/@month@/\@day@ \iMath@Revision]
@@ -24,11 +26,15 @@
 % \NeedsTeXFormat{LaTeX2e} ... usable under lualatex, latex3(?), latex2e 
 % \ProvidesPackage{iMath}[2014/04/22 v0.0]%%% 仕様変更注意
 \makeatletter
-%%% rnd@i, rnd@j, im@i, im@j should be 'local'
+%%% rnd@i, rnd@j, @imcnti, @imcntj, @imcnta,... should be 'local'
 \newcount\rnd@i
 \newcount\rnd@j
-\newcount\im@i
-\newcount\im@j
+\newcount\@imcnti
+\newcount\@imcntj
+\newcount\@imcnta
+\newcount\@imcntb
+\newcount\@imcntc
+\newcount\@imcntd
 %%% 
 %%% Basic Integer Arithmetic including Modulo and Power function
 %%%
@@ -41,18 +47,24 @@
 \def\im@sub#1#2#3{%%%
   \@tempcnta=#1\advance\@tempcnta -#2\xdef#3{\number\@tempcnta}}
 \def\im@mul#1#2#3{%%%
-  \@tempcnta=#1\multiply\@tempcnta by #2\xdef#3{\number\@tempcnta}}  
+  \@tempcnta=#1\multiply\@tempcnta by #2\xdef#3{\number\@tempcnta}}
 \def\im@div#1#2#3{%%%
-  \@tempcnta=#1\divide\@tempcnta by #2\xdef#3{\number\@tempcnta}}  
+  \@tempcnta=#1\divide\@tempcnta by #2\xdef#3{\number\@tempcnta}}
+\def\im@divres#1#2#3#4{%%%
+  \@imcnta=#1\@imcntb=#2%
+  \@tempcnta=#1\divide\@tempcnta by #2\xdef#3{\number\@tempcnta}%
+  \multiply\@imcntb by \@tempcnta%
+  \advance\@imcnta -\@imcntb\xdef#4{\number\@imcnta}%
+}
 \def\im@mod#1#2#3{%%%
-  % \expandafter\@tmp@la@i #1\im@i=\number\@tmp@la@i\relax
-  % \expandafter\@tmp@la@j #1\im@j=\number\@tmp@la@j\relax
-  % \divide\im@i #2\multiply\im@i by -#2
-  % \advance\im@j\im@i\xdef#3{\number\im@j}%
-  \expandafter\im@i #1\relax
-  \expandafter\im@j #1\relax
-  \divide\im@i #2\multiply\im@i by -#2
-  \advance\im@j\im@i\xdef#3{\number\im@j}}  
+  % \expandafter\@tmp@la@i #1\@imcnti=\number\@tmp@la@i\relax
+  % \expandafter\@tmp@la@j #1\@imcntj=\number\@tmp@la@j\relax
+  % \divide\@imcnti #2\multiply\@imcnti by -#2
+  % \advance\@imcntj\@imcnti\xdef#3{\number\@imcntj}%
+  \expandafter\@imcnti #1\relax
+  \expandafter\@imcntj #1\relax
+  \divide\@imcnti #2\multiply\@imcnti by -#2
+  \advance\@imcntj\@imcnti\xdef#3{\number\@imcntj}}  
 \def\im@pow{\@ifnextchar[%%%]
   {\@im@pow}{\@im@pow[0]}}
 \def\@im@pow[#1]#2#3#4{% #4=#2^#3 mod #1, #1=0 default
@@ -105,14 +117,14 @@
 \def\imCount#1{%
   \@ifnextchar={\im@Count{#1}}{\imGetCount{#1}}}
 \def\imAdvance#1#2{%
-  \expandafter\im@i\csname im@cnt:#1\endcsname\relax
-  \advance\im@i by #2\relax\imSetCount{#1}{\number\im@i}}
+  \expandafter\@imcnti\csname im@cnt:#1\endcsname\relax
+  \advance\@imcnti by #2\relax\imSetCount{#1}{\number\@imcnti}}
 \def\imMultiply#1#2{%
-  \expandafter\im@i\csname im@cnt:#1\endcsname\relax
-  \multiply\im@i by #2\relax\imSetCount{#1}{\number\im@i}}
+  \expandafter\@imcnti\csname im@cnt:#1\endcsname\relax
+  \multiply\@imcnti by #2\relax\imSetCount{#1}{\number\@imcnti}}
 \def\imDivide#1#2{%
-  \expandafter\im@i\csname im@cnt:#1\endcsname\relax
-  \divide\im@i by #2\relax\imSetCount{#1}{\number\im@i}}
+  \expandafter\@imcnti\csname im@cnt:#1\endcsname\relax
+  \divide\@imcnti by #2\relax\imSetCount{#1}{\number\@imcnti}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Original Stack Frame
 %%% \imPush / \imPop
@@ -237,9 +249,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Alias \ZAdd 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\let\ZAdd\im@add\relax\let\ZSub\im@sub\relax
-\let\ZMul\im@mul\relax\let\ZDiv\im@div\relax
-\let\ZMod\im@mod\relax\let\ZPow\im@pow\relax
+\let\ZAdd\im@add\relax\let\ZSub\im@sub\relax%
+\let\ZMul\im@mul\relax\let\ZDiv\im@div\relax\let\ZDivRes\im@divres\relax%
+\let\ZMod\im@mod\relax\let\ZPow\im@pow\relax%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% CallPariGP : use CAS (e.g. Pari/GP) with \@@input cmd(tex:\input)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -418,7 +430,9 @@
 \let\QFracP\QFracParen% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% random number related (experimental) 
-%%%%% Use '.lmr' for file name exttention to save the ramdom seed
+%%%% Use '.lmr' for file name exttention to save the ramdom seed
+%%%% if \jobname.lmr found, read the file and produce 
+%%%%   the same random pattern.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \gdef\@use@pari{0}
 \def\UsePari{\gdef\@use@pari{1}}
