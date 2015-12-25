@@ -1,0 +1,323 @@
+%%% MyCommands ... My commands and environment generically used in all tex files.
+%%% Separated from my-all-head.tex 2014-08-28
+\makeatletter
+\def\iMisc@Revision{Time-stamp: "2015/12/25"}
+\ProvidesPackage{iMisc}
+\RequirePackage{iMath}
+\RequirePackage{iSymbols}
+\RequirePackage{iExam}
+%\newcommand{\Int}{\displaystyle\int}%%% fails since Int already def
+
+%%%%% ITEMS %%%%%
+\newcounter{msitem}
+\newcommand{\msitem}{\setcounter{msitem}{\value{msitem}+1}%
+	\fbox{\ (\arabic{msitem})\ }\ }
+\newcounter{Sitem}
+\newlength{\preSitemskip}\setlength{\preSitemskip}{0.5em}
+\newlength{\postSitemskip}\setlength{\postSitemskip}{0.8em}
+\newcommand{\Sitembox}{%
+  \fbox{\setcounter{Sitem}{\value{Sitem}+1}\ (\alph{Sitem})\ }}
+\newcommand{\Sitem}{%
+  \setcounter{Sitem}{\value{Sitem}+1}\hspace{\preSitemskip}%
+  (\alph{Sitem})\hspace{\postSitemskip}}
+\newcommand{\resetSitem}{\setcounter{Sitem}{0}}
+
+\def\DispCoeff#1#2{\ensuremath{
+\ifnum#1>1 +#1 #2
+\else\ifnum#1=1 + #2
+\else\ifnum#1=-1- #2
+\else\ifnum#1<-1#1 #2
+\fi\fi\fi\fi
+}}
+
+\def\DispCoeffTop#1#2{\ensuremath{
+\ifnum#1>1 #1 #2
+\else\ifnum#1=1 #2
+\else\ifnum#1=-1 - #2
+\else\ifnum#1<-1 #1 #2
+\fi\fi\fi\fi
+}}
+
+%DispPower{x}{1} -> x, {x}{2} -> x^2, {x}{0} -> 1, {x}^{-1} -> \bunsuu1{x}
+\def\DispPower#1#2{\ensuremath{
+\ifnum#2>1 #1^{#2}
+\else\ifnum#2=1 #1
+\else\ifnum#2=0 1
+\else\ifnum#2=-1 \bunsuu1{#1}
+\else\IMul\#2{-1}\TmpN \bunsuu1{#1^{\TmpN}}
+\fi\fi\fi\fi
+}}
+
+%%
+%\def\compiletimetdus={%
+%\makeatletter\the\year-\two@digits\month-\two@digits\day\ \two@digits\hour:
+%\two@digits\minute:\two@digits\second\makeatother}
+\def\compiletimeid{%
+\the\year\two@digits\month\two@digits\day\two@digits\hour%
+\two@digits\minute}
+%%%%%%%%%%%%%%%%%%%%%%
+%%%%% List 処理: %%%%%
+%%%%%%%%%%%%%%%%%%%%%%
+% リスト #1 が空かどうかを判定する
+% \if\IsListEmpty\list hogehogetrue \else hogehogefalse\fi
+\let\EmptyList\@empty
+\def\IsListEmpty#1{TT\fi
+  \def\@arg{#1}%
+  \ifx#1\@empty
+}
+\let\EmptyList\@empty
+% リスト #1 の先頭に #2 を追加する
+\def\PushList#1#2{\edef#1{#2,#1}}
+% リスト #1 の末尾に #2 を追加する
+\def\AppendList#1#2{\edef#1{#1,#2}}
+% リスト #1 の先頭から要素を一つ取り除く
+\def\PopList#1{\@tempcnta=\z@
+   \let\list@save@list\@empty
+   \@for\member:=#1\do{%
+      \ifnum\@tempcnta=\z@
+         \member
+      \else
+        \ifnum\@tempcnta=\@ne
+           \edef\list@save@list{\member}
+        \else
+           \edef\list@save@list{\list@save@list,\member}%
+        \fi
+      \fi
+      \advance\@tempcnta\@ne
+   }%
+   \edef#1{\list@save@list}%
+}
+% リスト #1 のサイズを求める
+\def\SizeList#1{%
+   \@tempcnta=\z@
+   \@for\member:=#1\do{\advance\@tempcnta\@ne}%
+   \number\@tempcnta}
+% リスト #1 を逆順に並び替える
+\def\ReverseList#1#2{
+   \@tempcnta=\z@
+   \let\list@save@list\@empty
+   \@for\member:=#1\do{%
+      \ifnum\@tempcnta=\z@
+         \edef\list@save@list{\member}%
+      \else
+         \edef\list@save@list{\member,\list@save@list}%
+      \fi
+     \advance\@tempcnta\@ne
+   }%
+   \edef#2{\list@save@list}%
+}
+\def\ReverseListSelf#1{%
+   \@tempcnta=\z@
+   \let\list@save@list\@empty
+   \@for\member:=#1\do{%
+      \ifnum\@tempcnta=\z@
+         \edef\list@save@list{\member}%
+      \else
+         \edef\list@save@list{\member,\list@save@list}%
+      \fi
+     \advance\@tempcnta\@ne
+   }%
+   \edef#1{\list@save@list}%
+}
+% リスト #1 の直和を表示する
+\def\SumList#1{\@tempcnta=\z@
+   \@for\member:=#1\do{\advance \@tempcnta \member}%
+   \number\@tempcnta}
+% リスト #1 の直積を表示する
+\def\ProdList#1{\@tempcnta=\@ne
+   \@for\member:=#1\do{\multiply \@tempcnta \member}%
+   \number\@tempcnta}
+% リストの要素を表示する
+\def\ShowList{\@ifnextchar[{\@list@show}{\@list@show[\@empty]}}
+% 書式 #1 付で リスト #2 を表示する
+\def\@list@show[#1]#2{\@tempcnta=\z@
+   \@for\member:=#2\do{\advance\@tempcnta\@ne}%
+   \@for\member:=#2\do{%%%
+     \ifnum\@tempcnta>\@ne
+         \member#1%%
+      \else
+         \member%%
+      \fi
+      \advance\@tempcnta\m@ne
+   }}
+%% \jobs
+\def\StripPrefix#1>{}%% same as \stripg@prefix of latex
+\def\jobis#1{TT\fi
+  \def\predicate{#1}%
+  \@onelevel@sanitize\predicate% this is the same as below
+  % \edef\predicate{\expandafter\StripPrefix\meaning\predicate}%
+  \edef\job{\jobname}%
+  \ifx\job\predicate
+  % \ifx\jobname\predicate
+}
+%% isanumber? etc.
+\def\IsPositive#1{TT\fi
+  \ifcat_\ifnum0<0#1 _\else A\fi
+}
+\def\IsNonNegative#1{TT\fi
+  \ifcat_\ifnum9<1#1 _\else A\fi
+}
+\def\gobbleminus#1{\ifx-#1\else#1\fi}
+\def\IsInteger#1{TT\fi
+  \ifcat_\ifnum9<1\gobbleminus#1 _\else A\fi
+}
+%%% http://tex.stackexchange.com/questions/43341/how-to-make-an-infix-if-variant
+\def\IsShape#1{TT\fi% italic = it, bold = n
+  \def\f@shapetest{#1}%
+  \ifx\f@shape\f@shapetest
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% WordCount : macro argument does work!! %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\WordCount#1{%\@tempcnta\z@\relax%%%
+  \edef\@tmp@s{#1}%%%
+  \expandafter\@word@count\@tmp@s\relax%%%
+}
+\def\@word@count#1\relax{\@tempcnta\z@\relax%%%
+  \@tfor\@x:=#1\do{%%%
+    \advance\@tempcnta\@ne
+  }%%%
+  \number\@tempcnta%%%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% color definitions (xcolor) %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage[dvipdfmx]{xcolor}
+\definecolor{gray95}{gray}{0.95}
+\definecolor{gray90}{gray}{0.90}
+\definecolor{gray85}{gray}{0.85}
+\definecolor{gray80}{gray}{0.80}
+\definecolor{gray70}{gray}{0.70}
+\definecolor{gray60}{gray}{0.60}
+\definecolor{gray55}{gray}{0.55}
+\definecolor{gray50}{gray}{0.50}
+\definecolor{gray40}{gray}{0.40}
+\definecolor{gray30}{gray}{0.30}
+\definecolor{gray20}{gray}{0.20}
+\definecolor{gray10}{gray}{0.10}
+
+%%%%%%%%%%%%%%%%%%%%%
+%%%%% Underline %%%%%
+%%%%%%%%%%%%%%%%%%%%%
+\def\udline#1{\ {\setlength{\unitlength}{0.25em}
+    \IMul{#1}{4}\len
+  \begin{picture}(\len,0)
+    % \put(0,0){debug:\len}
+    \dottedline{0.7}(0,-1.5)(\len,-1.5)
+  \end{picture}}\ }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Counter related %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcounter{Problem}
+\newenvironment{Problem}%
+{\begin{list}{\fbox{\arabic{Problem}}}{\usecounter{Problem}%
+\setlength{\leftmargin}{2em}\setlength{\itemsep}{0pt}}}{\end{list}}
+
+\newcounter{sub}
+\newenvironment{sub}%
+{\begin{list}{(\arabic{sub})}{\usecounter{sub}%
+\setlength{\leftmargin}{2em}}}{\end{list}}
+\newcommand{\ritem}{\addtocounter{sub}{1}\quad(\arabic{sub})\ \,}
+
+\newcounter{subindex}
+\newcommand{\subidx}[1]{\addtocounter{subindex}{1}${#1}_{\arabic{subindex}}$}
+\newcommand{\resetsubidx}{\setcounter{subindex}{0}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% kana for Counter %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\Kana#1{\expandafter\@Kana\csname c@#1\endcsname}
+\def\@Kana#1{%
+  \ifcase#1\or い\or ろ\or は\or に\or ほ\or へ\or と
+           \or ち\or り\or ぬ\or る\or を
+           \or わ\or か\or よ\or た\or れ\or そ
+           \or つ\or ね\or な\or ら\or む
+           \or う\or ゐ\or の\or お\or く\or や\or ま\or け\or ふ\or こ\or え\or て
+           \or あ\or さ\or き\or ゆ\or め\or み\or し\or ゑ\or ひ\or も\or せ\or す\or ん
+  \else\@ctrerr\fi}
+\def\KANA#1{\expandafter\@KANA\csname c@#1\endcsname}
+\def\@KANA#1{%
+  \ifcase#1\or イ\or ロ\or ハ\or ニ\or ホ\or ヘ\or ト
+           \or チ\or リ\or ヌ\or ル\or ヲ
+           \or ワ\or カ\or ヨ\or タ\or レ\or ソ
+           \or ツ\or ネ\or ナ\or ラ\or ム
+           \or ウ\or ノ\or オ\or ク\or ヤ\or マ\or ケ\or フ\or コ\or エ\or テ
+           \or ア\or サ\or キ\or ユ\or メ\or ミ\or シ\or ヒ\or モ\or セ\or ス\or ン
+  \else\@ctrerr\fi}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% ifAns, AnsHW etc. %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\@ifundefined{Anstrue}{\newif\ifAns}{}
+% imported from LA2-head.tex / 2014.01.15
+% AnsDHW is defined for only compatibility. Use AnsHW strongly recommended
+\newsavebox{\tmp@box}
+\newdimen\tmp@ht
+\newdimen\tmp@dp
+\newdimen\tmp@rdp% depth for rule
+\def\AnsDHW{\@ifnextchar[{\@AnsDHW}{\@AnsDHW[t]}}
+\long\def\@AnsDHW[#1]#2#3#4#5{% Depth:#1(pt),Height:#2(pt),Width:#3(mm),Answer:#4
+  \rule[-#2mm]{0pt}{#3mm}
+  \ifAns\parbox[#1]{#4mm}{{\color{red} #5}}
+  \else\hspace{#4mm}\fi}
+\long\def\AnsHW#1#2#3{% #1 = total height, #2 = width, centering only
+  \savebox{\tmp@box}{\parbox[c]{#2mm}{\color{red}\large #3}}%
+  \tmp@ht=\ht\tmp@box\relax\tmp@dp=\dp\tmp@box%
+  \tmp@rdp=#1mm\addtolength\tmp@rdp{-\tmp@ht}
+  \addtolength\tmp@rdp{\tmp@dp}%
+  \divide\tmp@rdp by 2
+  \rule[-\tmp@rdp]{0pt}{#1mm}%
+  \ifAns\usebox{\tmp@box}\else\rule[0mm]{#2mm}{0mm}\fi
+}
+\def\NewSeq#1#2{%
+  \@tempcnta=\z@%
+  \@for\@a:=#2\do{% start from index 0
+    \edef\@@i{\number\@tempcnta}%
+    \expandafter\xdef\csname #1:\@@i\endcsname{\@a}
+    % {#1:\@@i}\csname #1:\@@i\endcsname
+    \advance\@tempcnta\@ne
+  }
+  \expandafter\gdef\csname #1\endcsname##1{%
+    \csname #1:##1\endcsname
+  }
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% emath Extentions              %%%%%
+%%%%% will be moved to emathExt.sty %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% depend on emath 
+\newcommand{\InsertKaitou}{\closeKaiFile
+  {\footnotesize\noindent【解答】\inputKaiFile}}
+\newcommand{\InsertKaitouVfill}{\closeKaiFile
+  \vfill{\footnotesize\noindent【解答】\inputKaiFile}}
+\newcommand{\InsertKaitouRotate}{\closeKaiFile
+  \vfill{\rotatebox{180}{\parbox[t]{\linewidth}{
+        \footnotesize\noindent【解答】\inputKaiFile}}}}
+%% http://ls-al.jp/blog2/item_1779.html
+\def\XopenKaiFile{
+\newwrite\boostream
+\def\KaiFile{\jobname.csv}
+\immediate\openout\boostream=\KaiFile
+}
+\def\XwriteKaiFile#1{%
+  \edef\myTxt{#1}%
+  \immediate\write\boostream{\myTxt}%
+}
+\def\XcloseKaiFile{
+  \immediate\closeout\boostream%
+}
+
+\def\YopenKaiFile{
+\newwrite\boostream
+\edef\YKaiFile{\jobname-\compiletimeid.csv}
+\immediate\openout\boostream=\YKaiFile
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% EOF of MyCommands.tex %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

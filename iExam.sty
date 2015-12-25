@@ -1,0 +1,221 @@
+%%% MyCommands ... My commands and environment generically used in all tex files.
+%%% Separated from my-all-head.tex 2014-08-28
+\makeatletter
+\def\iExam@Revision{Time-stamp: "2015/12/25"}
+\ProvidesPackage{iExam}
+\RequirePackage{iMath}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% various boxes useful? for an answersheet of exams
+%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newcommand{\shortbox}[1]{\framebox[2.2cm]{\rule[-2mm]{0mm}{6mm}#1}}
+%\newcommand{\LONGbox}[1]{\framebox[14cm]{\rule[-2mm]{0mm}{6mm}#1}}
+%\newcommand{\longbox}[1]{\framebox[12cm]{\rule[-2mm]{0mm}{6mm}#1}}
+%\newcommand{\highbox}[1]{\framebox[4cm]{\rule[-2mm]{0mm}{14mm}#1}}
+%\newcommand{\highlongbox}[1]{\framebox[8cm]{\rule[-16mm]{0mm}{18mm}#1}}
+%\newcommand{\smallbox}[1]{\framebox[2cm]{\rule[-1mm]{0mm}{4mm}{#1}}}
+%\newcommand{\minibox}[1]{\framebox[1cm]{\rule[-1mm]{0mm}{4mm}{#1}}}
+%\newcommand{\bigbox}[1]{\framebox[16cm]{\rule[-2mm]{0mm}{1.7cm}{#1}}}
+%\newcommand{\Bigbox}[1]{\framebox[16cm]{\rule[-2mm]{0mm}{2.8cm}{#1}}}
+%\newcommand{\BIgbox}[1]{\framebox[16cm]{\rule[-2mm]{0mm}{4.3cm}{#1}}}
+%\newcommand{\BIGbox}[1]{\framebox[16cm]{\rule[-2mm]{0mm}{6cm}{#1}}}
+%\newcommand{\BIGBox}[1]{\framebox[16cm]{\rule[-2mm]{0mm}{8.5cm}{#1}}}
+%\newcommand{\BIGBOx}[1]{\framebox[16cm]{\rule[-2mm]{0mm}{10cm}{#1}}}
+%\newcommand{\BIGBOX}[1]{\framebox[16cm]{\rule[-2mm]{0mm}{12cm}{#1}}}
+%\newcommand{\largebox}{\framebox[14cm]{\rule[-2mm]{0mm}{9.5cm}}}
+%\newcommand{\Largebox}{\framebox[14cm]{\rule[-2mm]{0mm}{12cm}}}
+%\newcommand{\ulitem}[1]{\raisebox{-.4em}{\small (#1)}}
+% \newcommand{\dummybox}[4]{\let\orgfboxsep\fboxsep\fboxsep=.5zw%
+% \makebox[#1mm]{\rule[-#2mm]{0mm}{#3mm}#4}\fboxsep=\orgfboxsep}
+\newcommand{\freebox}[4]{\let\orgfboxsep\fboxsep\fboxsep=.5zw%
+\framebox[#1mm]{\rule[-#2mm]{0mm}{#3mm}#4}\fboxsep=\orgfboxsep}
+\newcommand{\Freebox}[5]{\let\orgfboxsep\fboxsep\fboxsep=#1mm%
+\framebox[#2mm]{\rule[-#3mm]{0mm}{#4mm}#5}\fboxsep=\orgfboxsep}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Old style ansmode compatible macros
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newsavebox{\TmpAnsBox}
+% \newcommand{\setans}[1]{%
+%   \begin{lrbox}{\TmpAnsBox} \parbox{15cm}{#1} \end{lrbox}}
+% %  \savebox{\TmpAnsBox}[15cm]{#1}}
+% \newcommand{\putans}{\usebox{\TmpAnsBox}}
+% \newcommand{\ifans}[2]{\ifcase#1\or#2\fi}
+% \newcommand{\ifnotans}[2]{\ifcase#1#2\fi}
+% \newcommand{\caseans}[2]{\ifcase\ansmode#1\or#2\fi}
+% \newcommand{\ifamd}[1]{\ifcase\ansmode\or#1\fi}
+% \newcommand{\ifnotamd}[1]{\ifcase\ansmode#1\fi}
+%\newcounter{ansmode}
+%\newcommand{\setansmode}{\setcounter{ansmode}{1}}
+%\newcommand{\noansmode}{\setcounter{ansmode}{2}}
+%\newcommand*\ifansmode[1]{\ifcase ansmode\or%
+%  {#1}\or{}\fi}
+%%% use \renewcommand{\tmpskip}{\vspace{...em}}
+\newcommand{\tmpskip}{\bigskip}
+\newcounter{ansitem}
+\newcommand{\ansitem}{%
+  \setcounter{ansitem}{\value{ansitem}+1}\ (\arabic{ansitem})\ \ }
+\newcommand{\resetans}{\setcounter{ansitem}{0}}
+\newcounter{tensencnt}
+\newcommand\tensen[1]{%
+\setcounter{tensencnt}{0}
+\whiledo{\value{tensencnt}<#1}{%
+--\hfill\stepcounter{tensencnt}
+}--}
+\newcommand{\LNbox}[5]{\caseans{\freebox{#1}{#2}{#3}{#4}}{\freebox{#1}{#2}{#3}{\color{red}{#5}}}}
+%\let\orgfboxsep\fboxsep\fboxsep=.5zw\fbox{#2}\fboxsep=\orgfboxsep}}
+\newcommand{\Ans}[1]{\caseans{\vspace{1em}}{\par\noindent%
+\rule[.3zh]{.08\columnwidth}{.4pt}%
+\parbox[c]{.08\columnwidth}{\hfill＜解＞\hfill\ }%
+\rule[.3zh]{.78\columnwidth}{.4pt}%
+\newline\vspace{.5zh}
+\resetcounter{ansitem}{\parbox[t]{.92\columnwidth}{#1}}
+\newline\vspace{-.3zh}
+\noindent\hspace{-.005\columnwidth}%
+%\noindent\hspace{-.02\columnwidth}%
+\rule[.3zh]{.95\columnwidth}{.4pt}}}
+
+\newcommand{\Dummy}[1]{\empty}
+\newcommand{\numbox}{\framebox[7mm]{\rule[-1.0mm]{0mm}{6.5mm}}}
+\newcommand{\ExamHeadAuto}[5]{%%% New Version
+\begin{center}
+  \hfill
+  {\Large {#1}}
+  \hfill\caseans{\freebox{24}{9.5}{14}{#2}}%
+  {\phantom{\freebox{24}{9.5}{14}{}}}\hspace{-0.8cm}\phantom{1}\hfill%
+\end{center}
+\vspace{-3em}
+\begin{flushright}
+  \underline{{\@stnum}番号\ {\Large #4}\ \ }
+  \ \underline{氏名\qquad \parbox[t]{36mm}{\Large #5}\qquad}%
+\hspace{5em}\phantom{1111111}
+\end{flushright}
+}
+\newcommand{\ExamHead}[4]{%%% New Version: score box freestyle
+  \def\tmpA{#3}\def\tmpB{}
+\begin{center}
+  \hfill
+  {\Large {#1}}
+  \hfill\caseans{\freebox{24}{9.5}{14}{\parbox[t]{22mm}{#2}}}%
+  {\phantom{\freebox{24}{9.5}{14}{}}}\hspace{-0.6cm}\phantom{1}\hfill%
+\end{center}
+\vspace{-4em}
+\caseans{
+  \ifx\tmpA\tmpB
+  \begin{center}
+    \underline{\hspace{30em}}
+  \end{center}
+  \else
+  \begin{flushright}
+    \underline{{#3}番号 {#4}}
+    \ \underline{氏名\raisebox{-2.2mm}{\hspace{5.7cm}}}%
+    \hspace{5em}\phantom{1}
+  \end{flushright}
+  \fi
+}{\begin{center}〜解答例〜\end{center}}}
+\makeatletter
+\newcommand{\examheadauto}[5]{
+  \parbox[t]{186mm}{%
+    \begin{center}
+      \hfill{\Large {#1}}
+      \hfill\caseans{\freebox{24}{9.5}{14}{\hfill{\raisebox{-8mm}{\small /#2}}}}%
+      {\phantom{\freebox{24}{9.5}{14}{}}}\hspace{-0.6cm}\phantom{1}\hfill%
+    \end{center}
+    \vspace{-3em}
+    \begin{flushright}
+      \underline{{#3}番号\ {\Large #4}\ \ }
+      \underline{氏名\qquad \parbox[t]{36mm}{\Large #5}\qquad}%
+      \hspace{5em}\phantom{1111111}
+    \end{flushright}}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\examhead#1#2#3#4{
+  \edef\tmp@A{#3}\edef\tmp@C{#2}
+  \relax\vspace{-1.5zw}%
+  \begin{center}
+    \ \\
+    {\Large {#1}}
+  \end{center}
+  \vspace{-3zw}
+  \parbox[b]{.9\linewidth}{%
+    \begin{flushleft}
+      \ifx\empty\tmp@A
+      \underline{番号\hspace{9em}\rule{0pt}{10pt}}\qquad
+      \underline{氏名\hspace{18em}\rule{0pt}{10pt}}%\hspace{8em}
+      \else
+      \underline{{#3}番号 {#4}}
+      \ \underline{氏名\raisebox{-2.2mm}{
+          \caseans{\hspace{5.7cm}}%
+          {\raisebox{2.2mm}{\hbox to 5.7cm{\color{red}\qquad 解答例\qquad }}}}}%
+      \hspace{5em}\phantom{1}
+      \fi
+    \end{flushleft}
+  }
+  \raisebox{1.2zw}{\parbox[b]{.1\linewidth}{
+    \if\IsInteger{\tmp@C}
+    \ifnum\tmp@C=0
+    \hfill%
+    {\phantom{\freebox{24}{9.5}{14}{}}}\hspace{-0.8cm}\phantom{1}\hfill%
+    \else\ifnum\tmp@C=999
+    \hfill\freebox{24}{9.5}{14}{}\hspace{-0.8cm}\phantom{1}\hfill
+    \else
+    \hfill\caseans{\freebox{24}{9.5}{14}%
+      {\hfill{\raisebox{-8mm}{\scalebox{2}{/}\tmp@C}}}}%
+    {\phantom{\freebox{24}{9.5}{14}{}}}\hspace{-0.8cm}\phantom{1}\hfill
+    \fi\fi
+    \else
+    \hfill\caseans{\freebox{24}{9.5}{14}{\parbox[t]{22mm}{\tmp@C}}}%
+    {\phantom{\freebox{24}{9.5}{14}{}}}\hspace{-0.8cm}\phantom{1}\hfill%
+    \fi
+  }}\relax\vspace{-3.5zw}%
+}
+%%%%%%%%%%%%%%%%%%%%
+\newcommand{\examheadprobonly}[1]{
+\begin{center} {\Large {#1}} \end{center}
+%\vspace{-4em}
+\ifamd{\begin{center}〜解答例〜\end{center}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% emath Extentions              %%%%%
+%%%%% will be moved to emathExt.sty %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% depend on emath 
+\newcommand{\InsertKaitou}{\closeKaiFile
+  {\footnotesize\noindent【解答】\inputKaiFile}}
+\newcommand{\InsertKaitouVfill}{\closeKaiFile
+  \vfill{\footnotesize\noindent【解答】\inputKaiFile}}
+\newcommand{\InsertKaitouRotate}{\closeKaiFile
+  \vfill{\rotatebox{180}{\parbox[t]{\linewidth}{
+        \footnotesize\noindent【解答】\inputKaiFile}}}}
+%% http://ls-al.jp/blog2/item_1779.html
+\def\XopenKaiFile{
+\newwrite\boostream
+\def\KaiFile{\jobname.csv}
+\immediate\openout\boostream=\KaiFile
+}
+\def\XwriteKaiFile#1{%
+  \edef\myTxt{#1}%
+  \immediate\write\boostream{\myTxt}%
+}
+\def\XcloseKaiFile{
+  \immediate\closeout\boostream%
+}
+
+\def\YopenKaiFile{
+\newwrite\boostream
+\edef\YKaiFile{\jobname-\compiletimeid.csv}
+\immediate\openout\boostream=\YKaiFile
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatother
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% EOF of MyCommands.tex %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
