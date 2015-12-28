@@ -1,0 +1,57 @@
+\documentclass{article}
+
+\usepackage{iMath}
+\usepackage{iSymbols}
+\oddsidemargin -10mm
+\evensidemargin -10mm
+\topmargin -10mm
+\headsep 0mm
+\textheight 270mm
+\textwidth 180mm
+
+\begin{document}
+
+\noindent
+\S1 Arithmetic in $\WZ$
+
+\bigskip
+
+\noindent
+\verb+\ZAdd,\ZSub,\ZMul,\ZDiv,\ZDivRes+ ... 加減乗除
+
+\begin{verbatim}
+\def\x{7}\def\y{4}
+\ZAdd\x\y\z$\x+\y=\z$,
+\ZSub\x\y\z$\x-\y=\z$,
+\ZMul\x\y\z$\x\times \y=\z$,
+\ZDiv\x\y\z$\x/\y=\z$,
+\ZDivRes\x\y\q\r$\x=\y\times \q+\r$
+\end{verbatim}
+
+\noindent
+\def\x{7}\def\y{4}
+\ZAdd\x\y\z$\x+\y=\z$,
+\ZSub\x\y\z$\x-\y=\z$,
+\ZMul\x\y\z$\x\times \y=\z$
+\ZDiv\x\y\z$\x/\y=\z$,
+\ZDivRes\x\y\q\r$\x=\y\times \q+\r$
+\noindent
+
+\bigskip
+
+\noindent
+\verb+\ZRand+ ... 乱数生成(線形合同法による生成・再現可能)
+
+\begin{verbatim}
+\ZRand{2}{4}\x Random Integer between 2 and 4 $= \x$
+\end{verbatim}
+
+\noindent
+\ZRand{2}{4}\x Random Integer between 2 and 4 $= \x$
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: japanese-latex
+%%% TeX-master: t
+%%% End:
