@@ -1,7 +1,7 @@
 %
 % iMath.sty --- macros for Mathematical computing and printing
 % (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
-\def\iMath@Date{Time-stamp: "2015/12/25"}%
+\def\iMath@Date{Time-stamp: "2015/12/28"}%
 \def\iMath@Revision{0.91b}%
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
@@ -29,12 +29,12 @@
 %%% rnd@i, rnd@j, @imcnti, @imcntj, @imcnta,... should be 'local'
 \newcount\rnd@i
 \newcount\rnd@j
-\newcount\@imcnti
-\newcount\@imcntj
 \newcount\@imcnta
 \newcount\@imcntb
 \newcount\@imcntc
 \newcount\@imcntd
+\newcount\@imcnti
+\newcount\@imcntj
 %%% 
 %%% Basic Integer Arithmetic including Modulo and Power function
 %%%
@@ -502,6 +502,7 @@
 %   \xdef\@RSeed{\random@seed}%%%
 % }
 \def\SetRandomSeed#1{%%%
+  % \ifUsePGFrandom
   \gdef\@RSeed{#1}%%% as csv
 }
 % \def\SaveRandomSeed{
@@ -530,14 +531,14 @@
 %%%%% InitRandomSeed : load .lmr file or call NewRandomSeed and save
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\InitRandomSeed#1{%%%
-  \rnd@i=#1
-  \ifnum\rnd@i < 0 \multiply\rnd@i by -1
-  \NewRandomSeed{\number\rnd@i}%%%
+  \@imcnti=#1
+  \ifnum\@imcnti < 0 \multiply\@imcnti by -1
+  \NewRandomSeed{\number\@imcnti}%%%
   \else
   \IfFileExists{\jobname.lmr}{%%%
     \LoadRandomSeed{\jobname.lmr}
   }{%%% Debug: no File case
-    \NewRandomSeed{\number\rnd@i}%%%
+    \NewRandomSeed{\number\@imcnti}%%%
     \SaveRandomSeed%%%
   }
 }

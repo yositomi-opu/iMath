@@ -3,7 +3,7 @@
 % (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
 % (注) 本ファイルで定義されたマクロの仕様は予告なく変更されることがあります.
 \makeatletter
-\def\LinearAlg@Revision{Time-stamp: "2015/12/24"}
+\def\LinearAlg@Revision{Time-stamp: "2016/01/11"}
 % \ProvidesPackage{LinearAlg}\expandafter[\LinearAlg@Revision]%%% 仕様変更注意
 \ProvidesPackage{LinearAlg}[2015/11/17]%%% 仕様変更注意
 %
@@ -330,9 +330,9 @@
   \la@error{Before using \\#2, first define it via \\NewMatrix}%
   {\\NewMatrix{row}{col}{#2}}\fi%
 }%
-%%% Set Matrix : before use , define matrix by NewMatrix.
-\def\SetMatrix#1#2{% Set elements of #2 by #1 parameter 1000100 etc.
-  \la@chkdefined{#2}{SetMatrix}%
+%%% Put Matrix : before use , define matrix by NewMatrix.
+\def\PutMatrix#1#2{% Set elements of #2 by #1 parameter 1000100 etc.
+  \la@chkdefined{#2}{PutMatrix}%
   \la@row \csname #2:1,0\endcsname%
   \la@col \csname #2:0,1\endcsname\advance\la@col\@ne\relax%
   \la@i=1\la@j=1\relax%
@@ -361,7 +361,7 @@
   \edef\tmp@row{\the\la@i}%
   \edef\tmp@col{\the\la@j}%
   \NewMatrix{\tmp@row}{\tmp@col}{#2}\relax%
-  \expandafter\SetMatrix\expandafter{\tmp@arg}{#2}%
+  \expandafter\PutMatrix\expandafter{\tmp@arg}{#2}%
 }%
 \NewMatrix{30}{30}{CSSV@TMP}%
 \newcommand{\CSSVmatrix}[1]{%
