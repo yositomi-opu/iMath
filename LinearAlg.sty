@@ -3,9 +3,9 @@
 % (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
 % (注) 本ファイルで定義されたマクロの仕様は予告なく変更されることがあります.
 \makeatletter
-\def\LinearAlg@Revision{Time-stamp: "2016/01/11"}
+\def\LinearAlg@Revision{Time-stamp: "2016/01/13"}
 % \ProvidesPackage{LinearAlg}\expandafter[\LinearAlg@Revision]%%% 仕様変更注意
-\ProvidesPackage{LinearAlg}[2015/11/17]%%% 仕様変更注意
+\ProvidesPackage{LinearAlg}[2016/01/13]%%% 仕様変更注意
 %
 % \NeedsTeXFormat{LaTeX2e} ... もはや LaTeX2e でもない. lualatex OK を目指す
 % emath は lualatex で動かない ... emath からの脱却が必要
@@ -340,7 +340,7 @@
     % \la@k \la@i\advance\la@k\@ne
     % \la@l \la@j\advance\la@l\@ne
     \def\@@i{\number\la@i}\def\@@j{\number\la@j}%
-    \expandafter\xdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}%
+    \expandafter\gdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}%
     \advance\la@j\@ne%
     \ifnum\la@j=\la@col\la@j=1\advance\la@i\@ne\fi%
   }%
@@ -387,7 +387,7 @@
     \@whilenum \la@j<\la@col \do{%
       \edef\@@i{\number\la@i}\edef\@@j{\number\la@j}
       \edef\tmp@val{\csname #1\endcsname\@@i\@@j}
-      \expandafter\xdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}
+      \expandafter\gdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}
       \advance\la@j\@ne
     }
     \advance\la@i\@ne
@@ -506,7 +506,7 @@
       {;}{}}
     \advance\la@i\@ne%%%
   }%%%
-  \expandafter\xdef\csname #2\endcsname{\la@str}%%%
+  \expandafter\gdef\csname #2\endcsname\expandafter{\la@str}%%%
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ColVector#1

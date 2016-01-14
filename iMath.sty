@@ -1,10 +1,11 @@
 %
 % iMath.sty --- macros for Mathematical computing and printing
 % (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
-\def\iMath@Date{Time-stamp: "2015/12/28"}%
-\def\iMath@Revision{0.91b}%
+\def\iMath@Date{Time-stamp: "2016/01/14"}%
+\def\iMath@Revision{0.92a}%
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
+\def\IMalreadydefmsg#1{\message{Warning: #1 is already defined(skipped), so use \backslash IM#1 command instead.}}
 % \def\@get@rev Time-stamp: "#1"\relax{\gdef\@time@{#1}}%
 % \expandafter\@get@rev \iMath@Date\relax%
 % \ProvidesPackage{iMath}[\@year@/@month@/\@day@ \iMath@Revision]
@@ -27,6 +28,7 @@
 % \ProvidesPackage{iMath}[2014/04/22 v0.0]%%% 仕様変更注意
 \makeatletter
 %%% rnd@i, rnd@j, @imcnti, @imcntj, @imcnta,... should be 'local'
+
 \newcount\rnd@i
 \newcount\rnd@j
 \newcount\@imcnta
@@ -83,7 +85,7 @@
 %%% For loop with semicolon separated value
 %%% See latex.ltx @for definition.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\def\@empty{}
+\@ifundefined{@empty}{\def\@empty{}}{}
 % \gdef\sep@ch{;}
 \long\def\sc@fornoop#1\@@#2#3{}
 \long\def\sc@for#1:=#2\do#3{%
@@ -95,7 +97,23 @@
 \long\def\sc@iforloop#1;#2\@@#3#4{\def#3{#1}\ifx #3\@nnil
        \expandafter\sc@fornoop \else
       #4\relax\expandafter\sc@iforloop\fi#2\@@#3{#4}}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% \SeparateString(=\SepStr)
+%%%% e.g. \SepStr{hoge;\abc}{;}{\a}{\b}->\a=hoge,\b=\abc
+%%%% Separate string specified character
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\let\IMdef\gdef%
+\long\def\IMstrsep#1#2#3#4{%
+  \long\def\IM@@strsep##1#2\@nil{\IMdef#4{##1}}%
+  \long\def\IM@strsep##1#2##2\@nil{\IMdef#3{##1}%
+    \ifthenelse{\equal{##2}\empty}{\IMdef#4{##2}}{%
+      \expandafter\IM@@strsep##2\@nil}% remove extra separator
+  }
+  \expandafter\IM@strsep#1#2\@nil% call with adding extra separator
+}%
+\@ifundefined{strsep}{\let\strsep\IMstrsep}
+}{\IMalreaddefmsg{strsep}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Original Counter Method
 %%% Ex. 
