@@ -3,7 +3,7 @@
 % (C) 2010-2014 Kentaro YOSHITOMI(yositomi (at) las.osakafu-u.ac.jp)
 % (注) 本ファイルで定義されたマクロの仕様は予告なく変更されることがあります.
 \makeatletter
-\def\LinearAlg@Revision{Time-stamp: "2016/01/13"}
+\def\LinearAlg@Revision{Time-stamp: "2016/01/14"}
 % \ProvidesPackage{LinearAlg}\expandafter[\LinearAlg@Revision]%%% 仕様変更注意
 \ProvidesPackage{LinearAlg}[2016/01/13]%%% 仕様変更注意
 %
@@ -340,7 +340,7 @@
     % \la@k \la@i\advance\la@k\@ne
     % \la@l \la@j\advance\la@l\@ne
     \def\@@i{\number\la@i}\def\@@j{\number\la@j}%
-    \expandafter\gdef\csname #2:\@@i,\@@j\endcsname{\tmp@val}%
+    \expandafter\gdef\csname #2:\@@i,\@@j\endcsname\expandafter{\tmp@val}%
     \advance\la@j\@ne%
     \ifnum\la@j=\la@col\la@j=1\advance\la@i\@ne\fi%
   }%
